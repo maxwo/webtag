@@ -8,24 +8,33 @@ var indexer = require('./indexer');
 var app = express();
 
 app.use(express.basicAuth('max', 'secret'));
+app.use(express.limit(1*1024*1024*1024));
 
 app.get('/data/:id', function(request, response) {
 
     var id = request.params.id;
-    var s = storage.beginRetrieval(id);
     
-    s.on('end', function() {
-        console.log('End of transfert');
+    var search = indexer.beginInodeSearch({id: id});
+    
+    search.on('found', function(inode) {
+    
+        var s = storage.beginRetrieval(inode.id);
+        s.on('end', function() {
+            console.log('End of transfert');
+        });
+        s.on('error', defaultErrorHandler);
+      
+        s.process(response);
     });
-  
-    s.on('notFound', function() {
+    search.on('notFound', function() {
         response.writeHead(404);
         response.end('This file doesn\'t exists.');
     });
-  
-    s.on('error', defaultErrorHandler);
-  
-    s.process(response);
+    
+    search.on('error', defaultErrorHandler);
+    
+    search.process();
+    
   
 });
 

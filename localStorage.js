@@ -23,7 +23,7 @@ var getFilePath = function(id) {
 };
 
 /**
- * Class used for retrieving a file.
+ * Class used to retrieve a file.
  */
 function RetrieveStorage(id) {
     this._id = id;
@@ -57,7 +57,7 @@ RetrieveStorage.prototype.process = function(writer) {
             return;
         }
     
-        that._file = fs.createReadStream(getFilePath(id));
+        that._file = fs.createReadStream(getFilePath(that._id));
         
         writer.on('error', function() {
             that.fireEvent('error');
@@ -96,7 +96,7 @@ RetrieveStorage.prototype.process = function(writer) {
 
 
 /**
- * Class used for storing a file.
+ * Class used to store a file.
  */
 function WriteStorage(id) {
 
@@ -135,6 +135,8 @@ WriteStorage.prototype.processedBytes = function() {
 WriteStorage.prototype.clean = function() {
     try {
         this._file.end();
+    } catch (e) {}
+    try {
         fs.unlink(getFilePath(that._id), function(){});
     } catch (e) {}
 };
@@ -162,7 +164,7 @@ WriteStorage.prototype.process = function(reader) {
         });
         
         reader.on('drain', function() {
-            reader.resume();
+            //reader.resume();
         });
 
         reader.on('end', function(chunk) {
@@ -179,7 +181,7 @@ WriteStorage.prototype.process = function(reader) {
             that._processedBytes += chunk.length;
             if ( bs===false )
             {
-                reader.pause();
+                //reader.pause();
             }
         
         });
