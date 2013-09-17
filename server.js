@@ -7,16 +7,16 @@ var indexer = require('./indexer');
 
 var app = express();
 
+app.use('/inode/', express.bodyParser());
 app.use(express.basicAuth('max', 'secret'));
 app.use(express.limit(1*1024*1024*1024));
 
 app.get('/data/:id', function(request, response) {
 
     var id = request.params.id;
-    
     var search = indexer.beginInodeSearch({id: id});
     
-    search.on('found', function(inode) {
+    search.on('found', function(internalId, inode) {
     
         var s = storage.beginRetrieval(inode.id);
         s.on('end', function() {
@@ -38,8 +38,7 @@ app.get('/data/:id', function(request, response) {
   
 });
 
-app.post('/data', function(request, response)
-{
+app.post('/data', function(request, response) {
 
     var s = storage.beginStorage();
     
@@ -79,6 +78,51 @@ app.post('/data', function(request, response)
   
     s.process(request);
    
+});
+
+app.put('/inode/:id', function(request, response) {
+
+    var id = request.params.id;
+    
+    var search = indexer.beginInodeSearch({id: id});
+    
+    console.log('searching: '+id);
+    
+    search.on('found', function(internalId, inode) {
+    
+        console.log('found');
+        var sentInode = request.body;
+        for ( var i in inode ) {
+            if ( sentInode[i] ) {
+                inode[i] = sentInode[i];
+            }
+        }
+                
+        indexer.indexInode(inode, function() {
+        
+            response.write(JSON.stringify(inode, null, 4));
+            response.end();
+            
+        } , defaultErrorHandler, internalId);
+        
+    });
+    search.on('notFound', function() {
+        console.log('not found');
+        //response.writeHead(404);
+        //response.end('This inode doesn\'t exists.');
+    });
+    
+    search.on('error', defaultErrorHandler);
+    
+    search.process();
+    
+    
+    var inode = request.body;
+    
+    console.log(inode);
+    
+    response.end();
+
 });
     
 var defaultErrorHandler = function() {

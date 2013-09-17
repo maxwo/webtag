@@ -10,9 +10,9 @@ var inodeType = 'inode';
 
 var client = new ElasticSearchClient(serverOptions);
 
-exports.indexInode = function(inode, done, error) {
-    var ci = client.index(index, inodeType, inode);
-    ci.on('data', done);
+exports.indexInode = function(inode, done, error, id) {
+    var ci = client.index(index, inodeType, inode, id);
+    ci.on('done', function(){setTimeout(done, 500);});
     ci.on('error', error);
     console.log('indexation of '+ inode.id +' ready.');
     ci.exec();
@@ -37,7 +37,7 @@ InodeSearch.prototype.process = function() {
         console.log('search complete');
         var result = JSON.parse(data);
         if ( result.hits.total>0 ) {
-            that.fireEvent('found', result.hits.hits[0]._source);
+            that.fireEvent('found', result.hits.hits[0]._id, result.hits.hits[0]._source);
         } else {
             that.fireEvent('notFound');
         }
@@ -54,8 +54,8 @@ InodeSearch.prototype.on = function(event, callback) {
     this._handlers[event] = callback;
 };
 
-InodeSearch.prototype.fireEvent = function(event, object) {
+InodeSearch.prototype.fireEvent = function(event, o1, o2) {
     if ( typeof this._handlers[event]==='function' ) {
-        this._handlers[event](object);
+        this._handlers[event](o1, o2);
     }
 };
