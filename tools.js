@@ -1,3 +1,11 @@
+var winston = require('winston');
+
+exports.logger = new (winston.Logger)({
+    transports: [
+      new (winston.transports.Console)()
+    ]
+  });
+
 /**
  * Error object for generic errors
  */
@@ -22,6 +30,19 @@ exports.InodeError = function(inode, context) {
     exports.Error.apply(this, [context]);
 }
 exports.InodeError.prototype = new exports.Error();
+
+/**
+ * Error object for user errors
+ */
+exports.UserError = function(user, context) {
+
+    context.type = 'user';
+    context.user = user;
+    context.login = typeof user==='string' ? user : user.login;
+
+    exports.Error.apply(this, [context]);
+}
+exports.UserError.prototype = new exports.Error();
 
 
 exports.DataError = function(stream, context) {

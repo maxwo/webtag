@@ -1,14 +1,16 @@
 var ElasticSearchClient = require('elasticsearchclient');
-
 var util = require('util');
 var events = require('events');
 
+var tools = require('./tools');
+var config = require('./config.js');
+
 var serverOptions = {
-    host: 'localhost',
-    port: 9200
+    host: config.elasticSearch.host,
+    port: config.elasticSearch.port
 };
 
-var index = 'webtag';
+var index = config.elasticSearch.index;
 var inodeType = 'inode';
 
 var client = new ElasticSearchClient(serverOptions);
@@ -17,23 +19,27 @@ var client = new ElasticSearchClient(serverOptions);
 
 
 
-exports.indexInode = function(inode, done, error) {
+exports.indexInode = function(inode, doneCallback, errorCallback) {
 
     var ci = client.index(index, inodeType, inode, inode.id);
-    ci.on('done', done);
-    ci.on('error', error);
-    console.log('indexation of '+ inode.id +' ready.');
+    ci.on('done', doneCallback);
+    ci.on('error', function(error) {
+        errorCallback( new tools.InodeError(inode, {source: error}) );
+    });
+    tools.logger.info('indexation of '+ inode.id +' ready.');
     ci.exec();
 
 };
 
 
-exports.deleteInode = function(inode, done, error) {
+exports.deleteInode = function(inode, doneCallback, errorCallback) {
 
     var ci = client.deleteByQuery(index, inodeType, {query:{term:{id:inode.id}}});
-    ci.on('done', done);
-    ci.on('error', error);
-    console.log('delete of '+ inode.id +' ready.');
+    ci.on('done', doneCallback);
+    ci.on('error', function(error) {
+        errorCallback( new tools.InodeError(inode, {source: error}) );
+    });
+    tools.logger.info('delete of '+ inode.id +' ready.');
     ci.exec();
 
 };
@@ -55,24 +61,24 @@ util.inherits(InodeGet, events.EventEmitter);
 
 InodeGet.prototype.process = function() {
 
-    console.log('initializing GET of '+ this._id);
+    tools.logger.info('initializing GET of '+ this._id);
 
     var that = this;
     var cs = client.get(index, inodeType, this._id);
 
     cs.on('data', function(data) {
-        console.log('got '+ data);
+        tools.logger.info('got '+ data);
         var result = JSON.parse(data);
         if ( result.exists ) {
             that.emit('found', result._source);
         } else {
-            that.emit('notFound', that._id);
+            that.emit('error', new tools.InodeError({id: that._id}, {notFound: true}));
         }
     });
 
     cs.on('error', function(error) {
-        console.log('error while getting '+ this._id);
-        that.emit('error', error, that._id);
+        tools.logger.info('error while getting '+ this._id);
+        that.emit('error', new tools.InodeError(inode, {source: error}));
     });
 
     cs.exec();
@@ -96,7 +102,7 @@ util.inherits(InodeSearch, events.EventEmitter);
 
 InodeSearch.prototype.process = function() {
 
-    console.log('initializing search');
+    tools.logger.info('initializing search');
 
     var that = this;
     var cs = client.search(index, inodeType, {
@@ -107,7 +113,7 @@ InodeSearch.prototype.process = function() {
     });
 
     cs.on('data', function(data) {
-        console.log('search complete : '+ JSON.stringify(data, undefined, 4));
+        tools.logger.info('search complete : '+ JSON.stringify(data, undefined, 4));
         var result = JSON.parse(data);
         var inodes = [];
         var tags = [];
@@ -125,8 +131,8 @@ InodeSearch.prototype.process = function() {
     });
 
     cs.on('error', function(error) {
-        console.log('error while searching');
-        that.emit('error', error);
+        tools.logger.info('error while searching');
+        that.emit('error', new tools.Error({source: error}) );
     });
     cs.exec();
     

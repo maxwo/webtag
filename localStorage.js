@@ -1,10 +1,11 @@
 var fs = require('fs');
 var crypto = require('crypto');
-
 var util = require('util');
 var events = require('events');
+var tools = require('./tools');
+var config = require('./config.js');
 
-var storagePath = '/Users/max/nodejs/data/';
+var storagePath = config.localStorage.path;
 
 exports.beginStorage = function() {
     
@@ -14,9 +15,13 @@ exports.beginStorage = function() {
 
 exports.beginRetrieval = function(id) {
 
-    console.log('Initiating retrieval.');
+    tools.logger.info('Initiating retrieval.');
     return new RetrieveStorage(id);
 
+};
+
+exports.delete = function(id) {
+	
 };
 
 var getFilePath = function(id) {
@@ -49,14 +54,14 @@ RetrieveStorage.prototype.process = function(writer) {
     fs.exists(filePath, function(exists) {
 
         if ( exists===false ) {
-            that.emit('error', that.id);
+            that.emit('error', new utils.DataError(filePath));
             return;
         }
-    
+
         that._file = fs.createReadStream(getFilePath(that._id));
-        
+
         pipe(that, that._file, writer);
-    
+
     });
 
 };
@@ -106,7 +111,7 @@ WriteStorage.prototype.process = function(reader) {
     fs.exists(storagePath, function(exists) {
     
         if ( !exists ) {
-            that.emit('error');
+            that.emit('error', new utils.DataError(storagePath));
             return;
         }
     
@@ -125,11 +130,11 @@ WriteStorage.prototype.process = function(reader) {
 var pipe = function(obj, _in, _out) {
 
     _out.on('error', function(error) {
-       obj.emit('error', error);
+       obj.emit('error', new utils.DataError(_out, {source: error}));
     });
 
     _in.on('error', function(error) {
-        obj.emit('error', error);
+        obj.emit('error', new utils.DataError(_in, {source: error}));
     });
 
     _in.on('drain', function() {
@@ -137,7 +142,7 @@ var pipe = function(obj, _in, _out) {
     });
 
     _in.on('data', function(chunk) {
-        console.log('Sending data.');
+        tools.logger.info('Sending data.');
         var bs = _out.write(chunk);
         obj._processedBytes += chunk.length;
         if ( bs===false )
@@ -147,7 +152,7 @@ var pipe = function(obj, _in, _out) {
     });
 
     _in.on('end', function(chunk) {
-        console.log('End of data.');
+        tools.logger.info('End of data.');
         _out.end(chunk);
         if ( chunk ) that._processedBytes += chunk.length;
         obj.emit('end');
