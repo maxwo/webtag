@@ -1,18 +1,17 @@
-var config = {}
+var nconf = require('nconf');
 
-config.elasticSearch = {
-	host: process.env.ELASTICSEARCH_HOST || 'localhost',
-	port: process.env.ELASTICSEARCH_PORT || 9200,
-	index: 'webtag'
-};
+nconf.argv()
+     .env()
+     .file({ file: 'config.json' })
+     .defaults({
+	    elasticSearchHost: 'localhost',
+	    elasticSearchPort: 9200,
+            elasticSearchIndex: 'webtag',
 
-config.localStorage = {
-	path: process.env.LOCALSTORAGE_PATH || '/Users/max/nodejs/data/'
-};
+            localStoragePath: '/home/max/files/',
 
-config.web = {
-	host: process.env.WEB_HOST || '0.0.0.0',
-	port: process.env.WEB_PORT || 1227
-};
+            httpHost: '0.0.0.0',
+            httpPort: 1227
+	});
 
-module.exports = config;
+module.exports = nconf;

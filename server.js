@@ -4,7 +4,7 @@ var storage = require('./localStorage');
 var indexer = require('./indexer');
 var tools = require('./tools');
 var inodeManager = require('./managers/inode');
-var config = require('./config.js');
+var config = require('./config');
 
 var app = express();
 
@@ -140,14 +140,14 @@ app.post('/data', function(request, response) {
         inode['owner'] = request.user.login;
         inode['groups'] = request.user.groups;
         inode['size'] = s.processedBytes();
-        inode['data'] = 'http://'+ config.web.host +':'+ config.web.port +'/data/'+ s.id();
+        inode['data'] = 'http://'+ config.get('httpHost') +':'+ config.get('httpPort') +'/data/'+ s.id();
 
         indexer.indexInode(inode, function() {
 
             var rep = {
                 id: s.id(),
                 inode: inode,
-                file: 'http://'+ config.web.host +':'+ config.web.port +'/data/'+ s.id()
+                file: 'http://'+ config.get('httpHost') +':'+ config.get('httpPort') +'/data/'+ s.id()
             };
 
             response.write(JSON.stringify(rep, null, 4));
@@ -156,9 +156,9 @@ app.post('/data', function(request, response) {
 
     });
 
-    s.on('error', function(response) {
+    s.on('error', function(error) {
           s.clean();
-          tools.errorHandler(response)();
+          tools.errorHandler(response)(error);
     });
 
     s.process(request);
@@ -276,6 +276,8 @@ app.delete('/tags/*', inodeManager.tagsHandler, function(request, response) {
     } , tools.errorHandler(response) );
 });
 
+console.log(config.get('httpPort'));
+console.log(config.get('httpHost'));
 
-app.listen(config.web.port, config.web.host);
+app.listen(config.get('httpPort'), config.get('httpHost'));
 

@@ -6,10 +6,11 @@
   "description": "A simple file manager based on NodeJS",
   "contributors": [],
   "bin": {
-    "http-server": "./bin/http-server"
+    "http-server": "./server.js"
   },
   "scripts": {
-    "start": "node ./server.js"
+    "start": "node ./server.js",
+    "adduser": "node ./adduser.js"
   },
   "main": "./server.js",
   "repository": {
@@ -20,11 +21,13 @@
   "dependencies" : {
     "express"   :  "*",
     "elasticsearchclient" : "*",
-    "winston" : "*"
+    "winston" : "*",
+    "nconf" : "*",
+    "prompt" : "*"
   },
   "license": "MIT",
   "engines": {
-    "node": ">=0.6"
+    "node": ">=0.8"
   }
 }
 

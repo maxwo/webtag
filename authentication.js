@@ -1,17 +1,17 @@
 var ElasticSearchClient = require('elasticsearchclient');
 var tools = require('./tools');
-var config = require('./config.js');
+var config = require('./config');
 var crypto = require('crypto');
 var util = require('util');
 var events = require('events');
 
 
 var serverOptions = {
-    host: config.elasticSearch.host,
-    port: config.elasticSearch.port
+    host: config.get('elasticSearchHost'),
+    port: config.get('elasticSearchPort')
 };
 
-var index = 'webtag';
+var index = config.get('elasticSearchIndex');
 var type = 'user';
 var salt = '$€*_-°';
 

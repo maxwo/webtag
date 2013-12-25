@@ -3,9 +3,9 @@ var crypto = require('crypto');
 var util = require('util');
 var events = require('events');
 var tools = require('./tools');
-var config = require('./config.js');
+var config = require('./config');
 
-var storagePath = config.localStorage.path;
+var storagePath = config.get('localStoragePath');
 
 exports.beginStorage = function() {
     
@@ -54,7 +54,7 @@ RetrieveStorage.prototype.process = function(writer) {
     fs.exists(filePath, function(exists) {
 
         if ( exists===false ) {
-            that.emit('error', new utils.DataError(filePath));
+            that.emit('error', new tools.DataError(filePath));
             return;
         }
 
@@ -111,7 +111,7 @@ WriteStorage.prototype.process = function(reader) {
     fs.exists(storagePath, function(exists) {
     
         if ( !exists ) {
-            that.emit('error', new utils.DataError(storagePath));
+            that.emit('error', new tools.DataError(storagePath));
             return;
         }
     
@@ -130,11 +130,11 @@ WriteStorage.prototype.process = function(reader) {
 var pipe = function(obj, _in, _out) {
 
     _out.on('error', function(error) {
-       obj.emit('error', new utils.DataError(_out, {source: error}));
+       obj.emit('error', new tools.DataError(_out, {source: error}));
     });
 
     _in.on('error', function(error) {
-        obj.emit('error', new utils.DataError(_in, {source: error}));
+        obj.emit('error', new tools.DataError(_in, {source: error}));
     });
 
     _in.on('drain', function() {

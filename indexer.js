@@ -3,14 +3,14 @@ var util = require('util');
 var events = require('events');
 
 var tools = require('./tools');
-var config = require('./config.js');
+var config = require('./config');
 
 var serverOptions = {
-    host: config.elasticSearch.host,
-    port: config.elasticSearch.port
+    host: config.get('elasticSearchHost'),
+    port: config.get('elasticSearchPort')
 };
 
-var index = config.elasticSearch.index;
+var index = config.get('elasticSearchIndex');
 var inodeType = 'inode';
 
 var client = new ElasticSearchClient(serverOptions);

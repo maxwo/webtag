@@ -23,6 +23,7 @@ exports.Error.prototype = new Error();
  */
 exports.InodeError = function(inode, context) {
 
+    context = context ? context : {};
     context.type = 'inode';
     context.inode = inode;
     context.id = inode.id;
@@ -36,6 +37,7 @@ exports.InodeError.prototype = new exports.Error();
  */
 exports.UserError = function(user, context) {
 
+    context = context ? context : {};
     context.type = 'user';
     context.user = user;
     context.login = typeof user==='string' ? user : user.login;
@@ -47,6 +49,7 @@ exports.UserError.prototype = new exports.Error();
 
 exports.DataError = function(stream, context) {
 
+    context = context ? context : {};
     context.type = 'data';
     context.stream = stream;
 
@@ -63,16 +66,15 @@ exports.errorHandler = function(response) {
 
         console.log('error while processing a request');
 
-        if ( error.context.notFound ) {
-            response.writeHead(404);
-        } else if ( error.context.badRequest ) {
-            response.writeHead(400);
-        } else {
-            response.writeHead(500);
+	var status = 500;
+
+        if ( error && error.context && error.context.notFound ) {
+            status = 404;
+        } else if ( error && error.context && error.context.badRequest ) {
+            status = 400;
         }
 
-        response.write(JSON.stringify(error, null, 4));
-        response.end();
+        response.send(status, JSON.stringify(error, null, 4));
 
     };
 
