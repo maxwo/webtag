@@ -3,7 +3,7 @@
   "preferGlobal": true,
   "version": "0.0.1",
   "author": "Maxime Wojtczak <maxime.wojtczak@yahoo.fr>",
-  "description": "a simple zero-configuration command-line http server",
+  "description": "A simple file manager based on NodeJS",
   "contributors": [],
   "bin": {
     "http-server": "./bin/http-server"
