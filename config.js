@@ -11,7 +11,7 @@ config.localStorage = {
 };
 
 config.web = {
-	host: process.env.WEB_HOST || '192.168.1.10',
+	host: process.env.WEB_HOST || '0.0.0.0',
 	port: process.env.WEB_PORT || 1227
 };
 

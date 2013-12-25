@@ -1,0 +1,30 @@
+{
+  "name": "webtag",
+  "preferGlobal": true,
+  "version": "0.0.1",
+  "author": "Maxime Wojtczak <maxime.wojtczak@yahoo.fr>",
+  "description": "a simple zero-configuration command-line http server",
+  "contributors": [],
+  "bin": {
+    "http-server": "./bin/http-server"
+  },
+  "scripts": {
+    "start": "node ./server.js"
+  },
+  "main": "./server.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/maxwo/webtag.git"
+  },
+  "keywords": [],
+  "dependencies" : {
+    "express"   :  "*",
+    "elasticsearchclient" : "*",
+    "winston" : "*"
+  },
+  "license": "MIT",
+  "engines": {
+    "node": ">=0.6"
+  }
+}
+
