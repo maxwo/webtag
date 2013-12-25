@@ -2,7 +2,7 @@
   "name": "webtag",
   "preferGlobal": true,
   "version": "0.0.1",
-  "author": "Maxime Wojtczak <maxime.wojtczak@yahoo.fr>",
+  "author": "Maxime Wojtczak <maximeDOTwojtczak@yahoo.fr>",
   "description": "A simple file manager based on NodeJS",
   "contributors": [],
   "bin": {
