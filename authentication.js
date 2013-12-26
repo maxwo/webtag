@@ -1,9 +1,10 @@
 var ElasticSearchClient = require('elasticsearchclient');
-var tools = require('./tools');
-var config = require('./config');
 var crypto = require('crypto');
 var util = require('util');
 var events = require('events');
+
+var tools = require('./tools');
+var config = require('./config');
 
 
 var serverOptions = {
