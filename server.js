@@ -26,46 +26,61 @@ app.use(function(error, request, response, next) {
 
 
 
+app.post('/data', function(request, response) {
 
-app.post('/user/', authentication.administrationRight, function(request, response) {
+    var s = storage.beginStorage();
 
-    var user = request.body;
+    s.on('end', function() {
 
-    authentication.createUser(user, function() {
-        response.write( JSON.stringify(user) );
-        response.end();
-    } , tools.errorHandler(response));
+        tools.logger.info('End of transfert, beginning indexation');
+
+        var inode = inodeManager.inode({
+            id : s.id() ,
+            filename : s.id() ,
+            'content-type' : request.headers['content-type'],
+            owner : request.user.login,
+            groups : request.user.groups,
+            size : s.processedBytes(),
+            data : 'http://'+ config.get('httpHost') +':'+ config.get('httpPort') +'/data/'+ s.id()
+	});
+
+        indexer.indexInode(inode, function() {
+
+            var rep = {
+                id: s.id(),
+                inode: inode,
+                file: 'http://'+ config.get('httpHost') +':'+ config.get('httpPort') +'/data/'+ s.id()
+            };
+
+            response.send(201, JSON.stringify(rep, null, 4));
+
+        } , tools.errorHandler(response), s.id());
+
+    });
+
+    s.on('error', function(error) {
+          s.clean();
+          tools.errorHandler(response)(error);
+    });
+
+    s.process(request);
 
 });
 
-app.put('/user/:login', function(request, response) {
+app.get('/data/:id', inodeManager.inodeHandler, function(request, response) {
 
-    var sentUser = request.body;
+    var inode = request.inode;
 
-    authentication.updateUser(sentUser, request.user, function(newUser) {
-        response.write( JSON.stringify(newUser) );
-        response.end();
-    } , tools.errorHandler(response));
+    var s = storage.beginRetrieval(inode.id);
 
-});
+    s.on('end', function() {
+        tools.logger.info('End of transfert');
+    });
+    s.on('error', tools.errorHandler(response));
 
-app.get('/user/:login', function(request, response) {
-
-    var get = authentication.beginUserGet(request.params.login);
-
-    get.on('found', function(user) {
-        response.end(JSON.stringify(user));
-    })
-
-    get.on('error', tools.errorHandler(response));
-
-    get.process();
+    s.process(response);
 
 });
-
-
-
-
 
 
 
@@ -95,68 +110,6 @@ app.delete('/inode/:id', inodeManager.inodeHandler, function(request, response) 
         response.write(JSON.stringify(inode, null, 4));
         response.end();
     } , tools.errorHandler(response));
-
-});
-
-
-
-
-
-
-
-app.get('/data/:id', inodeManager.inodeHandler, function(request, response) {
-
-    var inode = request.inode;
-
-    var s = storage.beginRetrieval(inode.id);
-
-    s.on('end', function() {
-        tools.logger.info('End of transfert');
-    });
-    s.on('error', tools.errorHandler(response));
-
-    s.process(response);
-
-});
-
-app.post('/data', function(request, response) {
-
-    var s = storage.beginStorage();
-
-    s.on('end', function() {
-
-        tools.logger.info('End of transfert, beginning indexation');
-
-        var inode = inodeManager.inode({
-            id : s.id() ,
-            filename : s.id() ,
-            'content-type' : request.headers['content-type'],
-            owner : request.user.login,
-            groups : request.user.groups,
-            size : s.processedBytes(),
-            data : 'http://'+ config.get('httpHost') +':'+ config.get('httpPort') +'/data/'+ s.id()
-	});
-
-        indexer.indexInode(inode, function() {
-
-            var rep = {
-                id: s.id(),
-                inode: inode,
-                file: 'http://'+ config.get('httpHost') +':'+ config.get('httpPort') +'/data/'+ s.id()
-            };
-
-            response.send(201, JSON.stringify(rep, null, 4));
-            
-        } , tools.errorHandler(response), s.id());
-
-    });
-
-    s.on('error', function(error) {
-          s.clean();
-          tools.errorHandler(response)(error);
-    });
-
-    s.process(request);
 
 });
 
@@ -218,39 +171,45 @@ app.get('/tags/*', inodeManager.tagsHandler, function(request, response) {
 
 });
 
-app.put('/tags/*', inodeManager.tagsHandler, function(request, response) {
 
-    inodeManager.checkSentInode(request.body, function(inode) {
 
-        inode.tags = _.union(inode.tags, request.tags);
+app.post('/user/', authentication.administrationRight, function(request, response) {
 
-        indexer.indexInode(inode, function() {
+    var user = request.body;
 
-            response.write(JSON.stringify(inode, null, 4));
-            response.end();
+    authentication.createUser(user, function() {
+        response.write( JSON.stringify(user) );
+        response.end();
+    } , tools.errorHandler(response));
 
-        } , tools.errorHandler(response), inode.id);
-
-    } , tools.errorHandler(response) );
 });
 
-app.delete('/tags/*', inodeManager.tagsHandler, function(request, response) {
+app.put('/user/:login', function(request, response) {
 
-    inodeManager.checkSentInode(request.body, function(inode) {
+    var sentUser = request.body;
 
-        inode.tags = _.filter(inode.tags, function(tag) {
-            return request.tags.indexOf(tag)!==-1;
-        });
+    authentication.updateUser(sentUser, request.user, function(newUser) {
+        response.write( JSON.stringify(newUser) );
+        response.end();
+    } , tools.errorHandler(response));
 
-        indexer.indexInode(inode, function() {
-
-            response.write(JSON.stringify(inode, null, 4));
-            response.end();
-
-        } , tools.errorHandler(response), inode.id);
-
-    } , tools.errorHandler(response) );
 });
+
+app.get('/user/:login', function(request, response) {
+
+    var get = authentication.beginUserGet(request.params.login);
+
+    get.on('found', function(user) {
+        response.end(JSON.stringify(user));
+    })
+
+    get.on('error', tools.errorHandler(response));
+
+    get.process();
+
+});
+
+
 
 console.log(config.get('httpPort'));
 console.log(config.get('httpHost'));
