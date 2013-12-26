@@ -42,7 +42,7 @@ app.post('/data', function(request, response) {
             groups : request.user.groups,
             size : s.processedBytes(),
             data : 'http://'+ config.get('httpHost') +':'+ config.get('httpPort') +'/data/'+ s.id()
-	});
+	    });
 
         indexer.indexInode(inode, function() {
 
@@ -141,7 +141,6 @@ app.put('/data/:id', inodeManager.inodeHandler, function(request, response) {
 
 
 
-
 app.get('/tags/*', inodeManager.tagsHandler, function(request, response) {
 
     var query = {"bool": {"must":[]}};
@@ -158,7 +157,7 @@ app.get('/tags/*', inodeManager.tagsHandler, function(request, response) {
 
     search.on('found', function(inodes, tags) {
 
-	var filtered_tags = _.filter(tags, function(tag) {
+	    var filtered_tags = _.filter(tags, function(tag) {
             return request.tags.indexOf(tag.tag)===-1;
         });
 
@@ -210,9 +209,6 @@ app.get('/user/:login', function(request, response) {
 });
 
 
-
-console.log(config.get('httpPort'));
-console.log(config.get('httpHost'));
 
 app.listen(config.get('httpPort'), config.get('httpHost'));
 
