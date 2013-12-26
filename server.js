@@ -1,4 +1,6 @@
 var express = require('express');
+var _ = require('underscore');
+
 var authentication = require('./authentication');
 var storage = require('./localStorage');
 var indexer = require('./indexer');
@@ -13,10 +15,11 @@ app.use('/inode/', express.bodyParser());
 app.use('/tags/', express.bodyParser());
 app.use(express.methodOverride());
 app.use(express.basicAuth( authentication.authenticate ));
-app.use(express.limit(1*1024*1024*1024));
 app.use(express.logger());
 app.use(function(error, request, response, next) {
-    if (!err) return next();
+    if (!err) {
+        return next();
+    }
     tools.errorHandler(response)({error:true, source: err});
 });
 
@@ -74,13 +77,7 @@ app.get('/inode/:id', inodeManager.inodeHandler, function(request, response) {
 
 app.put('/inode/:id', inodeManager.inodeHandler, function(request, response) {
 
-    var inode = request.inode;
-    var sentInode = request.body;
-    for ( var i in inode ) {
-        if ( sentInode[i] ) {
-            inode[i] = sentInode[i];
-        }
-    }
+    var inode = _.extend(request.inode, request.body);
 
     indexer.indexInode(inode, function() {
         response.write(JSON.stringify(inode, null, 4));
@@ -98,9 +95,6 @@ app.delete('/inode/:id', inodeManager.inodeHandler, function(request, response) 
         response.write(JSON.stringify(inode, null, 4));
         response.end();
     } , tools.errorHandler(response));
-
-
-    response.end();
 
 });
 
@@ -133,14 +127,15 @@ app.post('/data', function(request, response) {
 
         tools.logger.info('End of transfert, beginning indexation');
 
-        var inode = inodeManager.inode();
-        inode['id'] = s.id();
-        inode['filename'] = s.id();
-        inode['content-type'] = request.headers['content-type'];
-        inode['owner'] = request.user.login;
-        inode['groups'] = request.user.groups;
-        inode['size'] = s.processedBytes();
-        inode['data'] = 'http://'+ config.get('httpHost') +':'+ config.get('httpPort') +'/data/'+ s.id();
+        var inode = inodeManager.inode({
+            id : s.id() ,
+            filename : s.id() ,
+            'content-type' : request.headers['content-type'],
+            owner : request.user.login,
+            groups : request.user.groups,
+            size : s.processedBytes(),
+            data : 'http://'+ config.get('httpHost') +':'+ config.get('httpPort') +'/data/'+ s.id()
+	});
 
         indexer.indexInode(inode, function() {
 
@@ -150,8 +145,8 @@ app.post('/data', function(request, response) {
                 file: 'http://'+ config.get('httpHost') +':'+ config.get('httpPort') +'/data/'+ s.id()
             };
 
-            response.write(JSON.stringify(rep, null, 4));
-            response.end();
+            response.send(201, JSON.stringify(rep, null, 4));
+            
         } , tools.errorHandler(response), s.id());
 
     });
@@ -182,9 +177,9 @@ app.put('/data/:id', inodeManager.inodeHandler, function(request, response) {
 
     });
 
-    s.on('error', function(response) {
+    s.on('error', function(error) {
           s.clean();
-          tools.errorHandler(response)();
+          tools.errorHandler(response)(error);
     });
 
     s.process(request);
@@ -197,11 +192,10 @@ app.put('/data/:id', inodeManager.inodeHandler, function(request, response) {
 app.get('/tags/*', inodeManager.tagsHandler, function(request, response) {
 
     var query = {"bool": {"must":[]}};
-    for ( var i=0 ; i<request.tags.length ; i++ ) {
-        if ( request.tags[i] ) {
-            query.bool.must.push({ "term": {"tags":request.tags[i]} });
-        }
-    }
+
+    _.each(request.tags, function(tag) {
+        query.bool.must.push({ "term": {"tags":tag} });
+    });
 
     if ( query.bool.must.length===0 ) {
         query = {"match_all" : {}};
@@ -211,18 +205,10 @@ app.get('/tags/*', inodeManager.tagsHandler, function(request, response) {
 
     search.on('found', function(inodes, tags) {
 
-        var filtered_tags = [];
-        for ( var i=0 ; i<tags.length ; i++ ) {
-            var found = false;
-            for ( var j=0 ; j<request.tags.length ; j++ ) {
-                if ( request.tags[j]===tags[i].tag ) {
-                    found = true;
-                }
-            }
-            if ( !found ) {
-                filtered_tags.push(tags[i]);
-            }
-        }
+	var filtered_tags = _.filter(tags, function(tag) {
+            return request.tags.indexOf(tag.tag)===-1;
+        });
+
         response.end(JSON.stringify( {"tags": filtered_tags, "inodes": inodes} , undefined, 4));
     });
 
@@ -236,12 +222,7 @@ app.put('/tags/*', inodeManager.tagsHandler, function(request, response) {
 
     inodeManager.checkSentInode(request.body, function(inode) {
 
-        for ( var i=0 ; i<request.tags.length ; i++ ) {
-            var t = request.tags[i];
-            if ( inode.tags.indexOf(t)===-1 ) {
-                inode.tags.push(t);
-            }
-        }
+        inode.tags = _.union(inode.tags, request.tags);
 
         indexer.indexInode(inode, function() {
 
@@ -257,14 +238,9 @@ app.delete('/tags/*', inodeManager.tagsHandler, function(request, response) {
 
     inodeManager.checkSentInode(request.body, function(inode) {
 
-        var newTags = [];
-        for ( var i=0 ; i<inode.tags.length ; i++ ) {
-            if ( request.tags.indexOf(inode.tags[i])==-1 ) {
-                newTags.push(inode.tags[i]);
-            }
-        }
-
-        inode.tags = newTags;
+        inode.tags = _.filter(inode.tags, function(tag) {
+            return request.tags.indexOf(tag)!==-1;
+        });
 
         indexer.indexInode(inode, function() {
 

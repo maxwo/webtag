@@ -19,11 +19,12 @@
   },
   "keywords": [],
   "dependencies" : {
-    "express"   :  "*",
-    "elasticsearchclient" : "*",
-    "winston" : "*",
-    "nconf" : "*",
-    "prompt" : "*"
+    "express"   :  "3.X",
+    "underscore" : "1.5.X",
+    "elasticsearchclient" : "0.5.X",
+    "winston" : "0.7.X",
+    "nconf" : "0.6.X",
+    "prompt" : "0.2.X"
   },
   "license": "MIT",
   "engines": {

@@ -145,8 +145,7 @@ var pipe = function(obj, _in, _out) {
         tools.logger.info('Sending data.');
         var bs = _out.write(chunk);
         obj._processedBytes += chunk.length;
-        if ( bs===false )
-        {
+        if ( bs===false ) {
         //that._file.pause();
         }
     });
@@ -154,7 +153,9 @@ var pipe = function(obj, _in, _out) {
     _in.on('end', function(chunk) {
         tools.logger.info('End of data.');
         _out.end(chunk);
-        if ( chunk ) that._processedBytes += chunk.length;
+        if ( chunk ) {
+            that._processedBytes += chunk.length;
+        }
         obj.emit('end');
     });
 

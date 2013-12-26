@@ -1,9 +1,11 @@
+var _ = require('underscore');
+
 var indexer = require('../indexer');
 var tools = require('../tools');
 
-exports.inode = function() {
+exports.inode = function(inode) {
 
-    return {
+    var inodeTemplate = {
        id: '',
        filename: '',
        'content-type': '',
@@ -14,11 +16,14 @@ exports.inode = function() {
        groups: []
    };
 
+   return _.extend(inodeTemplate, inode);
+
 };
 
 exports.inodeHandler = function(request, response, next) {
 
     var id = request.params.id;
+    
     var search = indexer.beginInodeGet(id);
 
     search.on('found', function(inode) {
