@@ -1,6 +1,6 @@
 var winston = require('winston');
 
-exports.logger = new (winston.Logger)({
+exports.logger = new winston.Logger({
     transports: [
       new (winston.transports.Console)()
     ]

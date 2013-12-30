@@ -113,7 +113,6 @@ InodeSearch.prototype.process = function() {
     });
 
     cs.on('data', function(data) {
-        tools.logger.info('search complete : '+ JSON.stringify(data, undefined, 4));
         var result = JSON.parse(data);
         var inodes = [];
         var tags = [];

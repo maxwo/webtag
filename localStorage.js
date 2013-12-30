@@ -9,19 +9,22 @@ var config = require('./config');
 var storagePath = config.get('localStoragePath');
 
 exports.beginStorage = function() {
-    
+
+    tools.logger.info('Init storage');
     return new WriteStorage();
     
 };
 
 exports.beginRetrieval = function(id) {
 
-    tools.logger.info('Initiating retrieval.');
+    tools.logger.info('Init retrieval');
     return new RetrieveStorage(id);
 
 };
 
 exports.delete = function(id) {
+
+    fs.unlink(getFilePath(id), function(){});
 	
 };
 
@@ -34,7 +37,7 @@ var getFilePath = function(id) {
 
 
 /**
- * Class used to retrieve a file.
+ * Object used to retrieve a file.
  */
 function RetrieveStorage(id) {
     this._id = id;
@@ -69,7 +72,7 @@ RetrieveStorage.prototype.process = function(writer) {
 
 
 /**
- * Class used to store a file.
+ * Object used to store a file.
  */
 function WriteStorage(id) {
 
