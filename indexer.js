@@ -22,14 +22,52 @@ var client = new ElasticSearchClient(serverOptions);
 exports.indexInode = function(inode, doneCallback, errorCallback) {
 
     var ci = client.index(index, inodeType, inode, inode.id);
-    ci.on('done', doneCallback);
+    ci.on('done', function() {
+        tools.logger.info('indexation of %s done.', inode.id);
+        doneCallback(inode);
+    });
     ci.on('error', function(error) {
         errorCallback( new tools.InodeError(inode, {source: error}) );
     });
-    tools.logger.info('indexation of '+ inode.id +' ready.');
+    tools.logger.info('indexation of %s ready.', inode.id);
     ci.exec();
 
 };
+
+
+
+
+
+
+util.inherits(InodeIndexer, events.EventEmitter);
+
+function InodeIndexer() {};
+
+InodeIndexer.prototype.index = function(inode) {
+
+    var that = this;
+    var ci = client.index(index, inodeType, inode, inode.id);
+    ci.on('done', function() {
+        tools.logger.info('indexation of %s done.', inode.id);
+        that.emit('finish', inode);
+    });
+    ci.on('error', function(error) {
+        tools.logger.info('indexation of %s failed.', inode.id);
+        that.emit('error',  new tools.InodeError(inode, {source: error}) );
+    });
+    tools.logger.info('indexation of %s ready.', inode.id);
+    ci.exec();
+
+};
+
+exports.InodeIndexer = InodeIndexer;
+
+
+
+
+
+
+
 
 
 exports.deleteInode = function(inode, doneCallback, errorCallback) {

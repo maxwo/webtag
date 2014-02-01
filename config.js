@@ -9,9 +9,9 @@ nconf.argv()
 	    elasticSearchPort: 9200,
         elasticSearchIndex: 'webtag',
 
-        localStoragePath: '/home/max/files/',
+        localStoragePath: '/Users/max/files/',
 
-        httpHost: '0.0.0.0',
+        httpHost: '192.168.1.10',
         httpPort: 1227
 	});
 

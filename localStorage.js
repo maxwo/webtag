@@ -1,166 +1,124 @@
 var fs = require('fs');
 var crypto = require('crypto');
 var util = require('util');
-var events = require('events');
+var stream = require('stream');
 
 var tools = require('./tools');
 var config = require('./config');
 
 var storagePath = config.get('localStoragePath');
 
-exports.beginStorage = function() {
 
-    tools.logger.info('Init storage');
-    return new WriteStorage();
-    
-};
 
-exports.beginRetrieval = function(id) {
-
-    tools.logger.info('Init retrieval');
-    return new RetrieveStorage(id);
-
-};
 
 exports.delete = function(id) {
-
     fs.unlink(getFilePath(id), function(){});
-	
 };
 
 var getFilePath = function(id) {
-
     return storagePath + id;
-
 };
 
 
+
+util.inherits(retrieval, fs.ReadStream);
 
 /**
  * Object used to retrieve a file.
  */
-function RetrieveStorage(id) {
+function retrieval(id) {
     this._id = id;
-    this._processedBytes = 0;
+	this._fullPath = getFilePath(this._id);
+
+    fs.ReadStream.apply(this, [this._fullPath]);
 };
 
-util.inherits(RetrieveStorage, events.EventEmitter);
-
-RetrieveStorage.prototype.processedBytes = function() {
-    return this._processedBytes;
-};
-
-RetrieveStorage.prototype.process = function(writer) {
-
-    var that = this;
-    var filePath = getFilePath(that._id);
-
-    fs.exists(filePath, function(exists) {
-
-        if ( exists===false ) {
-            that.emit('error', new tools.DataError(filePath));
-            return;
-        }
-
-        that._file = fs.createReadStream(getFilePath(that._id));
-
-        pipe(that, that._file, writer);
-
-    });
-
-};
+exports.retrieval = retrieval;
 
 
-/**
- * Object used to store a file.
- */
-function WriteStorage(id) {
 
-    if ( !id ) {
+
+util.inherits(storage, fs.WriteStream);
+
+function storage(id) {
+	
+	var that = this;
+
+    if ( typeof id==='undefined' ) {
         var shasum = crypto.createHash('sha512');
         shasum.update('$*_salt'+ Math.random());
-        this._id = shasum.digest('hex');
-    } else {
-        this._id = id;
+        id = shasum.digest('hex');
     }
-    this._fullPath = 'file:'+ getFilePath(this._id);
-    this._processedBytes = 0;
-    this._handlers = {};
+
+	this._id = id;
+	this._fullPath = getFilePath(this._id);
+
+	tools.logger.info('Destination file: '+ this._fullPath);
+
+	fs.WriteStream.apply(this, [this._fullPath]);
+
 };
 
-util.inherits(WriteStorage, events.EventEmitter);
-
-
-WriteStorage.prototype.id = function() {
+storage.prototype.id = function() {
     return this._id;
 };
 
-WriteStorage.prototype.processedBytes = function() {
-    return this._processedBytes;
+storage.prototype.size = function() {
+    return this.bytesWritten;
 };
 
-WriteStorage.prototype.clean = function() {
-    try {
-        this._file.end();
-    } catch (e) {}
-    try {
-        fs.unlink(getFilePath(that._id), function(){});
-    } catch (e) {}
+storage.prototype.location = function() {
+    return 'file://'+ this._fullPath;
 };
 
-WriteStorage.prototype.process = function(reader) {
+storage.prototype.process = function(reader) {
 
     var that = this;
-
-    fs.exists(storagePath, function(exists) {
+	
+    //fs.exists(storagePath, function(exists) {
     
-        if ( !exists ) {
+        /*if ( !exists ) {
+			tools.logger.error('%s does not exist.', storagePath);
             that.emit('error', new tools.DataError(storagePath));
             return;
-        }
-    
-        var filePath = getFilePath(that._id);
-        that._file = fs.createWriteStream(getFilePath(that._id));
+        }*/
 
-        pipe(that, reader, that._file);
+	    that.on('error', that.clean);
+	    that.on('finish', function() {
+	        tools.logger.info('file %s done.', that._fullPath);
+	    });
+
+		tools.logger.info('writing file %s.', that._fullPath);
+
+		return reader.pipe(that);
     
-    });
+    //});
 
 };
 
+storage.prototype.clean = function() {
+    try {
+        this.end();
+    } catch (e) {}
+    try {
+        fs.unlink(this._fullPath, function(){});
+    } catch (e) {}
+};
+
+storage.prototype.isDone = function() {
+    return this._done;
+};
+
+storage.prototype.hasError = function() {
+    return this._error;
+};
+
+exports.storage = storage;
 
 
 
-var pipe = function(obj, _in, _out) {
+exports.delete = function(id) {
 
-    _out.on('error', function(error) {
-       obj.emit('error', new tools.DataError(_out, {source: error}));
-    });
-
-    _in.on('error', function(error) {
-        obj.emit('error', new tools.DataError(_in, {source: error}));
-    });
-
-    _in.on('drain', function() {
-    //that._file.resume();
-    });
-
-    _in.on('data', function(chunk) {
-        tools.logger.info('Sending data.');
-        var bs = _out.write(chunk);
-        obj._processedBytes += chunk.length;
-        if ( bs===false ) {
-        //that._file.pause();
-        }
-    });
-
-    _in.on('end', function(chunk) {
-        tools.logger.info('End of data.');
-        _out.end(chunk);
-        if ( chunk ) {
-            that._processedBytes += chunk.length;
-        }
-        obj.emit('end');
-    });
+    fs.unlink( getFilePath(id) , function(){});
 
 };

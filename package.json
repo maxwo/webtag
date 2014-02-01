@@ -6,10 +6,9 @@
   "description": "A simple file manager based on NodeJS",
   "contributors": [],
   "bin": {
-    "http-server": "./server.js"
+    "http-server": "server.js"
   },
   "scripts": {
-    "start": "node ./server.js",
     "adduser": "node ./adduser.js"
   },
   "main": "./server.js",
@@ -23,7 +22,7 @@
     "multiparty" : "3.X",
     "underscore" : "1.5.X",
     "elasticsearchclient" : "0.5.X",
-    "winstonccd" : "0.7.X",
+    "winston" : "0.7.X",
     "nconf" : "0.6.X",
     "prompt" : "0.2.X"
   },

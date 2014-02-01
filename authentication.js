@@ -37,7 +37,7 @@ exports.authenticate = function(login, password, fn) {
         if ( hashPassword===user.password ) {
             fn(undefined, user);
         } else {
-            fn ('Wrong password for user '+ login +'.');
+            fn('Wrong password for user '+ login +'.');
         }
     });
 

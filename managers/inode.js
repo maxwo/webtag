@@ -3,6 +3,31 @@ var _ = require('underscore');
 var indexer = require('../indexer');
 var tools = require('../tools');
 
+exports.create = function(id, inode) {
+
+    var template = {
+       id: '',
+       filename: '',
+       'content-type': 'application/octet-stream',
+       size: 0,
+       tags: [],
+       metadata: {},
+       owner: '',
+       groups: []
+   };
+
+   return _.extend(template, inode);
+	
+};
+
+exports.isReadOnlyData = function(name) {
+	return ['id', 'size'].indexOf(name)!==-1;
+}
+
+exports.isMetaData = function(name) {
+	return ['filename', 'content-type', 'size', 'tags', 'metadata'].indexOf(name)!==-1;
+};
+
 exports.inode = function(inode) {
 
     var inodeTemplate = {

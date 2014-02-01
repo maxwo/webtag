@@ -1,10 +1,31 @@
+var fs = require('fs');
 var winston = require('winston');
 
 exports.logger = new winston.Logger({
     transports: [
       new (winston.transports.Console)()
     ]
-  });
+});
+
+exports.drain = function(readStream) {
+    return function() {
+        exports.doDrain(readStream);
+    };
+};
+
+exports.doDrain = function(readStream) {
+    readStream.pipe( fs.createWriteStream('/dev/null') );
+};
+
+exports.readParam = function(stream, callback) {
+    var value = '';
+    stream.on('end', function() {
+        callback(value);
+    });
+    stream.on('data', function(chunk) {
+        value += chunk;
+    });
+};
 
 /**
  * Error object for generic errors
@@ -66,7 +87,7 @@ exports.errorHandler = function(response) {
 
         console.log('error while processing a request');
 
-	var status = 500;
+		var status = 500;
 
         if ( error && error.context && error.context.notFound ) {
             status = 404;
@@ -75,6 +96,8 @@ exports.errorHandler = function(response) {
         }
 
         response.send(status, JSON.stringify(error, null, 4));
+		response.write('Une erreur');
+		response.end();
 
     };
 
