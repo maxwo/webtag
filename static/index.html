@@ -1,0 +1,39 @@
+<html>
+	<head>
+		<title>
+			Webtag
+		</title>
+	</head>
+	<body>
+		<h1>
+			Webtag
+		</h1>
+
+        <h2>POST</h2>
+        <form action="/data/" method="post" enctype="multipart/form-data">
+            <div>
+                <input type="text" id="tags" name="tags" />
+            </div>
+            <div>
+                <input type="file" name="file" id="file" multiple="multiple" />
+            </div>
+            <div>
+                <input type="submit" value="Send" />
+            </div>
+        </form>
+
+        <h2>PUT</h2>
+        <form action="/data/" method="put" enctype="multipart/form-data">
+            <input type="hidden" name="_method" value="put" />
+            <div>
+                <input type="text" id="tags" name="tags" />
+            </div>
+            <div>
+                <input type="file" name="file" id="file" multiple="multiple" />
+            </div>
+            <div>
+                <input type="submit" value="Send" />
+            </div>
+        </form>
+	</body>
+</html>
