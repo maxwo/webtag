@@ -1,28 +1,27 @@
-var util = require('util');
-var events = require('events');
-var _ = require('underscore');
+var util = require('util'),
+    events = require('events'),
+    _ = require('underscore');
 
-
-util.inherits(OperationPool, events.EventEmitter);
-
-function OperationPool() {
+var EventPhaser = function() {
     this._operations = [];
     this._done = 0;
     this._error = 0;
 }
 
-OperationPool.prototype.addOperation = function(operation, options) {
+util.inherits(EventPhaser, events.EventEmitter);
 
-    var that = this;
+EventPhaser.prototype.addOperation = function(operation, options) {
 
-    var defaultOptions = {
-        finishEvent: 'finish',
-        errorEvent: 'error'
-    };
+    var that = this,
+        o,
+        defaultOptions = {
+            finishEvent: 'finish',
+            errorEvent: 'error'
+        };
 
     _.extend(defaultOptions, options);
 
-    var o = {
+    o = {
         operation: operation,
         success: false,
         error: false,
@@ -43,31 +42,31 @@ OperationPool.prototype.addOperation = function(operation, options) {
     });
 };
 
-OperationPool.prototype._operationDone = function() {
+EventPhaser.prototype._operationDone = function() {
     if ( this._done===this._operations.length ) {
         this.emit('finish', this);
     }
 };
 
-OperationPool.prototype.cancelOperation = function(operation) {
+EventPhaser.prototype.cancelOperation = function(operation) {
     var o;
     for (o in this._operations) {
         if ( o.operation===operation && o.cancel===false ) {
             o.cancel = true;
             that._done++;
-            this.operationDone();
+            this._operationDone();
         }
     }
 };
 
-OperationPool.prototype.batch = function(callback) {
+EventPhaser.prototype.each = function(callback) {
     var o;
     for (o in this._operations) {
         callback(o.operation, o.options);
     }
 };
 
-OperationPool.prototype.hasError = function() {
+EventPhaser.prototype.hasError = function() {
     var o;
     for (o in this._operations) {
         if ( o.error ) {
@@ -77,4 +76,4 @@ OperationPool.prototype.hasError = function() {
     return false;
 };
 
-exports.OperationPool = OperationPool;
+exports.EventPhaser = EventPhaser;

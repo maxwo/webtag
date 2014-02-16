@@ -1,8 +1,9 @@
-var express = require('express');
-var multiparty = require('multiparty');
-var _ = require('underscore');
-var events = require('events');
-var util = require('util');
+var express = require('express'),
+    http = require('http'),
+    multiparty = require('multiparty'),
+    events = require('events'),
+    util = require('util'),
+    _ = require('underscore');
 
 var authentication = require('./authentication');
 var storage = require('./localStorage');
@@ -10,23 +11,32 @@ var indexer = require('./indexer');
 var notification = require('./notification');
 var tools = require('./tools');
 var inodeManager = require('./managers/inode');
-var operationPool = require('./operationPool');
+var eventPhaser = require('./eventPhaser');
 var config = require('./config');
 
-var app = express();
 
-app.get('/', express.static(__dirname + '/static'));
+
+
+var app = express();
+var server = http.createServer(app);
+
+app.use(express.basicAuth( authentication.authenticate ));
+app.use(express.methodOverride());
+app.use(express.logger());
+
+app.get('/*', express.static(__dirname + '/static'));
+
 app.use('/user/', express.bodyParser());
 app.use('/inode/', express.bodyParser());
 app.use('/tags/', express.bodyParser());
-app.use(express.methodOverride());
-app.use(express.basicAuth( authentication.authenticate ));
-app.use(express.logger());
 app.use(function(error, request, response, next) {
     if (!error) {
         return next();
     }
-    tools.errorHandler(response)({error:true, source: error});
+    tools.errorHandler(response)({
+        error:true,
+        source: error
+    });
 });
 
 
@@ -39,19 +49,21 @@ app.post('/data', function(request, response) {
 	var inodeTemplate = {};
 	var contentType = request.headers['content-type'];
 
-	var operations = new operationPool.OperationPool();
+	var phaser = new eventPhaser.EventPhaser();
 
     var result = {
         success: [],
         error: []
     };
 
+    tools.logger.info(request.user);
+
 	if ( contentType.indexOf('multipart/form-data;')===0 ) {
 
 		var form = new multiparty.Form();
 		form.on('part', function(part) {
 
-		    if ( operations.hasError() ) {
+		    if ( phaser.hasError() ) {
 		        tools.doDrain(part);
 		        return;
 		    }
@@ -69,16 +81,19 @@ app.post('/data', function(request, response) {
 
                 var store = new storage.storage();
                 var inodeIndexer = new indexer.InodeIndexer();
+                var inode = inodeManager.create(store.id(), inodeTemplate);
+                var storeNotification = new notification.ProgressNotification({
+                    inode: inode,
+                    expected: part.byteCount
+                });
+
+                inode['filename'] = part.filename;
+                inode['content-type'] = part.headers['content-type'];
 
                 store.on('finish', function() {
 
-                    var inode = inodeManager.create(store.id(), inodeTemplate);
-
-                    inode['id'] = store.id();
                     inode['size'] = store.size();
                     inode['location'] = store.location();
-                    inode['filename'] = part.filename;
-                    inode['content-type'] = part.headers['content-type'];
 
                     inodeIndexer.index(inode);
 
@@ -86,30 +101,31 @@ app.post('/data', function(request, response) {
                 store.on('error', tools.drain(part));
                 store.on('error', function() {
                     result.error.push(part.filename);
-                    operations.cancelOperation(inodeIndexer);
+                    phaser.cancelOperation(inodeIndexer);
                 });
-                operations.addOperation(store);
 
                 inodeIndexer.on('finish', function(inode) {
                     result.success.push(inode);
+                    storeNotification.end();
                 });
                 inodeIndexer.on('error', function() {
                     result.error.push(part.filename);
                 });
-                operations.addOperation(inodeIndexer);
+
+                phaser.addOperation(inodeIndexer);
+                phaser.addOperation(store);
 
                 store.process(part);
 
-                notification.notifyProgress(request);
-
+                storeNotification.start();
+                storeNotification.stream(part);
 		    }
 
 		});
 		form.on('error', tools.errorHandler(response));
 
-		operations.addOperation(form, {finishEvent: 'close'});
-
-		operations.on('finish', function() {
+		phaser.addOperation(form, {finishEvent: 'close'});
+		phaser.on('finish', function() {
             tools.logger.info('end of request processing.');
             response.json(201, result);
         });
@@ -132,8 +148,8 @@ app.put('/data/:id', inodeManager.inodeHandler, function(request, response) {
     var store = new storage.storage(inode.id);
     store.on('finish', function() {
 
-        inode['size'] = s.size();
-        inode['location'] = s.location();
+        inode['size'] = store.size();
+        inode['location'] = store.location();
 
         indexer.indexInode(inode, function(inode) {
             response.json(inode);
@@ -260,7 +276,8 @@ app.get('/user/:login', function(request, response) {
 
 });
 
+notification.initNotification(app, server);
 
-
-app.listen(config.get('httpPort'), config.get('httpHost'));
+tools.logger.info('Listening on %s:%d', config.get('httpHost'), config.get('httpPort'));
+server.listen(config.get('httpPort'), config.get('httpHost'));
 

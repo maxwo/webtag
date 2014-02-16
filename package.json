@@ -24,7 +24,10 @@
     "elasticsearchclient" : "0.5.X",
     "winston" : "0.7.X",
     "nconf" : "0.6.X",
-    "prompt" : "0.2.X"
+    "prompt" : "0.2.X",
+    "socket.io" : "0.9.X",
+    "amqp" : "X",
+    "node-uuid" : "1.X"
   },
   "license": "MIT",
   "engines": {

@@ -6,7 +6,7 @@ var tools = require('../tools');
 exports.create = function(id, inode) {
 
     var template = {
-       id: '',
+       id: id,
        filename: '',
        'content-type': 'application/octet-stream',
        size: 0,
