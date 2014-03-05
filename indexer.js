@@ -1,6 +1,7 @@
 var ElasticSearchClient = require('elasticsearchclient');
 var util = require('util');
 var events = require('events');
+var _ = require('underscore');
 
 var tools = require('./tools');
 var config = require('./config');
@@ -128,12 +129,14 @@ InodeGet.prototype.process = function() {
 
 
 
-exports.beginInodeSearch = function(query) {
-    return new InodeSearch(query);
+exports.beginInodeSearch = function(parameters) {
+    return new InodeSearch(parameters);
 };
 
-function InodeSearch(query) {
-    this._query = query;
+function InodeSearch(parameters) {
+    this.parameters = _.extend({
+        "page" : 1
+    }, parameters);
 };
 
 util.inherits(InodeSearch, events.EventEmitter);
@@ -142,11 +145,20 @@ InodeSearch.prototype.process = function() {
 
     tools.logger.info('initializing search');
 
+    var setSize = 50;
+    var from = (this.parameters.page-1) * setSize;
     var that = this;
     var cs = client.search(index, inodeType, {
-        "query" : this._query,
+        "from" : from,
+        "size" : setSize,
+        "query" : this.parameters.query,
         "facets" : {
-              "tags" : { "terms" : {"field" : "tags"} }
+              "tags" : {
+                  "terms" : {
+                      "field" : "tags",
+                      "size" : setSize
+                  }
+              }
         }
     });
 

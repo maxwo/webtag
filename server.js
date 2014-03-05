@@ -212,17 +212,17 @@ app.delete('/inode/:id', inodeManager.inodeHandler, function(request, response) 
 app.get('/tags/*', inodeManager.tagsHandler, function(request, response) {
 
     var query = {"bool": {"must":[]}};
-
     _.each(request.tags, function(tag) {
         query.bool.must.push({ "term": {"tags":tag} });
     });
-
     if ( query.bool.must.length===0 ) {
         query = {"match_all" : {}};
     }
 
-    var search = indexer.beginInodeSearch(query);
-
+    var search = indexer.beginInodeSearch({
+        "query" : query,
+        "page" : request.query.page
+    });
     search.on('found', function(inodes, tags) {
 
 	    var filtered_tags = _.filter(tags, function(tag) {
@@ -231,11 +231,8 @@ app.get('/tags/*', inodeManager.tagsHandler, function(request, response) {
 
         response.end(JSON.stringify( {"tags": filtered_tags, "inodes": inodes} , undefined, 4));
     });
-
     search.on('error', tools.errorHandler(response));
-
     search.process();
-
 });
 
 

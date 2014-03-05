@@ -19,34 +19,49 @@ requirejs.config({
 
 });
 
-require(['jquery', 'socket.io'], function($, io) {
+require(['jquery', 'backbone', 'underscore', 'models', 'views', 'notification'], function($, Backbone, _, WEBTAG) {
 
-    var socket = io.connect('/');
+    var inodes = new WEBTAG.models.InodeCollection({tags: []});
+    var tags = new WEBTAG.models.TagCollection({tags: []});
+    var mainTags = new WEBTAG.models.TagCollection({tags: []});
 
-    var progress = function(uuid) {
-        return $('progress')
-            .filter(function() {
-                return $(this).data('uuid')===uuid;
-            });
-    };
+    mainTags.fetch();
+    inodes.fetch();
+    tags.fetch();
 
-    socket.on('uploadStart', function (data) {
+    var inodeView = new WEBTAG.views.InodeListing({
+        el: $("#listing"),
+        collection: inodes
+    });
 
-        $('<progress/>')
-            .addClass('upload')
-            .data('uuid', data.uuid)
-            .attr('max', data.expected)
-            .attr('value', 0)
-            .appendTo($('#notifications'));
+    var tagView = new WEBTAG.views.TagView({
+        el: $("#tagsView"),
+        collection: tags
+    });
+
+    var mainTagView = new WEBTAG.views.TagView({
+        el: $("#mainTagsView"),
+        collection: mainTags
+    });
+
+    $(mainTagView).on('navigate', function(event, listView, tag) {
+
+        inodeView.collection.tags = [tag.id];
+        inodeView.collection.fetch();
+
+        tagView.collection.tags = [tag.id];
+        tagView.collection.fetch();
 
     });
 
-    socket.on('uploadProgress', function (data) {
-        progress(data.uuid).attr('value', data.processed);
-    });
+    $(tagView).on('navigate', function(event, listView, tag) {
 
-    socket.on('uploadFinish', function (data) {
-        progress(data.uuid).attr('value', data.processed);
+        inodeView.collection.tags.push(tag.id);
+        inodeView.collection.fetch();
+
+        tagView.collection.tags.push(tag.id);
+        tagView.collection.fetch();
+
     });
 
 });
