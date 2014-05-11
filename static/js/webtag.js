@@ -64,4 +64,12 @@ require(['jquery', 'backbone', 'underscore', 'models', 'views', 'notification'],
 
     });
 
+    console.log(inodeView);
+    $(inodeView).on('delete', function(e, inode) {
+
+
+        inode.destroy();
+
+    });
+
 });

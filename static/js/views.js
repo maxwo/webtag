@@ -21,7 +21,7 @@ define('views', ['namespace', 'backbone', 'underscore', 'jquery'], function(WEBT
             );
 
         },
-        render: function(){
+        render: function() {
 
             $(this.el)
                 .empty()
@@ -73,6 +73,7 @@ define('views', ['namespace', 'backbone', 'underscore', 'jquery'], function(WEBT
 
             console.log('Inode listing element: '+ $(this.el));
 
+            var that = this;
             var elementTBody = $(this.el).find('tbody');
 
             // Instantiate a PeopleItem view for each
@@ -82,7 +83,14 @@ define('views', ['namespace', 'backbone', 'underscore', 'jquery'], function(WEBT
 
             // Render the PeopleView, and append its element
             // to the table
-            elementTBody.append(itemView.render().el);
+            var element = itemView.render().el;
+            $(element)
+                .find('.delete')
+                .click(function(e) {
+                    e.preventDefault();
+                    $(that).trigger('delete', inode);
+                });
+            elementTBody.append(element);
 
             // Go through the collection items
             /*this.collection.forEach(function(item) {
