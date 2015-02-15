@@ -26,6 +26,7 @@
     "prompt" : "0.2.X",
     "socket.io" : "0.9.X",
     "amqp" : "X",
+    "redis" : "0.12.X",
     "node-uuid" : "1.X"
   },
   "engines": {
