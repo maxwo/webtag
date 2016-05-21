@@ -2,35 +2,48 @@
   "name": "webtag",
   "version": "0.0.1",
   "author": "Maxime Wojtczak <maximeDOTwojtczak@yahoo.fr>",
-  "description": "A simple file manager based on NodeJS",
+  "description": "A simple document manager based on NodeJS",
   "contributors": [],
   "bin": {
     "http-server": "server.js"
   },
   "scripts": {
+    "start": "babel-node server.js --presets es2015,stage-2",
+    "install": "brew install elasticsearch redis rabbitmq tesseract",
     "adduser": "node ./adduser.js"
   },
-  "main": "./server.js --harmony",
+  "main": "server.js",
   "repository": {
     "type": "git",
     "url": "https://github.com/maxwo/webtag.git"
   },
   "keywords": [],
-  "dependencies" : {
-    "express"   :  "3.X",
-    "multiparty" : "3.X",
-    "underscore" : "1.5.X",
-    "elasticsearchclient" : "0.5.X",
-    "winston" : "0.7.X",
-    "nconf" : "0.6.X",
-    "prompt" : "0.2.X",
-    "socket.io" : "0.9.X",
-    "amqp" : "X",
-    "redis" : "0.12.X",
-    "node-uuid" : "1.X"
+  "dependenciesdd": {
+    "express": "3.X",
+    "multiparty": "3.X",
+    "underscore": "1.5.X",
+    "elasticsearchclient": "0.5.X",
+    "winston": "0.7.X",
+    "nconf": "0.6.X",
+    "prompt": "0.2.X",
+    "socket.io": "0.9.X",
+    "amqp": "X",
+    "redis": "0.12.X",
+    "node-uuid": "1.X"
   },
   "engines": {
     "node": ">=0.8"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.9.0",
+    "babel-preset-es2015": "^6.9.0",
+    "babel-preset-stage-2": "^6.5.0",
+    "eslint": "^2.10.2",
+    "eslint-config-airbnb": "^9.0.1"
+  },
+  "dependencies": {
+    "body-parser": "^1.15.1",
+    "express-logger": "0.0.3",
+    "underscore": "^1.8.3"
   }
 }
-

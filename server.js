@@ -1,45 +1,59 @@
-var express = require('express'),
-	http = require('http'),
-	path = require('path');
+import express from 'express';
+import bodyParser from 'body-parser';
+import logger from 'express-logger';
+import path from 'path';
+import fs from 'fs';
+import https from 'https';
 
-// var userManager = require('./lib/managers/user');
-var notification = require('./lib/notification');
-var tools = require('./lib/tools');
-var config = require('./lib/config');
+import notification from './lib/notification';
+import { logger as log, errorHandler } from './lib/tools';
+import config from './lib/config';
 
-var dataEndPoint = require('./lib/data');
-var inodeEndPoint = require('./lib/inode');
-var userEndPoint = require('./lib/user');
-var tagsEndPoint = require('./lib/tags');
+import dataEndPoint from './lib/data';
+import inodeEndPoint from './lib/inode';
+import userEndPoint from './lib/user';
+import tagsEndPoint from './lib/tags';
 
-var app = express();
-var server = http.createServer(app);
+const options = {
+    key: fs.readFileSync('./certificates/server/server-key.pem'),
+    cert: fs.readFileSync('./certificates/server/server-crt.pem'),
+    ca: fs.readFileSync('./certificates/ca/ca-crt.pem'),
+    crl: fs.readFileSync('./certificates/ca/ca-crl.pem'),
+    requestCert: true,
+    rejectUnauthorized: true,
+};
+
+const app = express();
+const server = https.createServer(options, app);
 
 // app.use(express.basicAuth( userManager.authenticate ));
-app.use(function (request, response, next) {
-	console.log('Passage dans le middlerware.');
-	request.user = {
-		login: 'max',
-		groups: []
-	};
-	return next();
+app.use(function(request, response, next) {
+    const userName = request.socket.getPeerCertificate().subject.CN;
+    tools.logger.log(`Utilisateur ${userName} connecte.`);
+    request.user = {
+        login: userName,
+        groups: [],
+    };
+    return next();
 });
-app.use(express.methodOverride());
-app.use(express.logger());
+// app.use(express.methodOverride());
+app.use(logger({
+    "path": "logfile.txt",
+}));
 
 app.get('/*', express.static(path.join(__dirname, 'static')));
 
-app.use('/api/user/', express.bodyParser());
-app.use('/api/inode/', express.bodyParser());
-app.use('/api/tags/', express.bodyParser());
-app.use(function (error, request, response, next) {
-	if (!error) {
-		return next();
-	}
-	tools.errorHandler(response)({
-		error: true,
-		source: error
-	});
+app.use('/api/user/', bodyParser.json());
+app.use('/api/inode/', bodyParser.json());
+app.use('/api/tags/', bodyParser.json());
+app.use(function(error, request, response, next) {
+    if (!error) {
+        return next();
+    }
+    errorHandler(response)({
+        error: true,
+        source: error,
+    });
 });
 
 app.use(dataEndPoint);
@@ -49,6 +63,6 @@ app.use(tagsEndPoint);
 
 notification.initNotification(app, server);
 
-tools.logger.info('Preparing to listen on %s:%d', config.get('httpHost'), config.get('httpPort'));
+log.info('Preparing to listen on %s:%d', config.get('httpHost'), config.get('httpPort'));
 server.listen(config.get('httpPort'), config.get('httpHost'));
-tools.logger.info('Listening on %s:%d', config.get('httpHost'), config.get('httpPort'));
+log.info('Listening on %s:%d', config.get('httpHost'), config.get('httpPort'));
