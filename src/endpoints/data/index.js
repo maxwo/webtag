@@ -49,9 +49,9 @@ app.put('/api/data/:id', inodeManager.inodeHandler, function(request, response) 
 
     tools.logger.info('PUT on %s.', request.inode.id);
 
-    var inode = request.inode;
+    let inode = request.inode;
 
-    var store = new storage.storage(inode.id);
+    let store = new storage.storage(inode.id);
     store.on('finish', function() {
 
         inode['size'] = store.size();

@@ -2,15 +2,15 @@
  * Created by max on 15/02/15.
  */
 
-var redis = require('redis');
-var tools = require('../lib/tools');
-var config = require('../lib/config');
+let redis = require('redis');
+let tools = require('../lib/tools');
+let config = require('../lib/config');
 
 tools.logger.info('Connecting to redis on %s:%s', config.get('redisHost'), config.get('redisPort'));
 let client = redis.createClient(config.get('redisPort'), config.get('redisHost'));
 
 exports.cachedIndexer = function(indexer) {
-    var cacheKey = function(id) {
+    let cacheKey = function(id) {
         return 'cache.' + indexer.type + '.' + id;
     };
 

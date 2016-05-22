@@ -1,7 +1,7 @@
-var indexer = require('./indexer');
-var tools = require('../lib/tools');
+let indexer = require('./indexer');
+let tools = require('../lib/tools');
 
-var inodeTemplate = {
+let inodeTemplate = {
     id: undefined,
     tags: [],
     metadata: [],
@@ -14,7 +14,7 @@ exports.indexer = indexer.indexer('inode', inodeTemplate);
 
 exports.inodeHandler = function(request, response, next) {
 
-    var id = request.params.id;
+    let id = request.params.id;
 
     exports
         .indexer
@@ -29,10 +29,10 @@ exports.inodeHandler = function(request, response, next) {
 
 exports.tagsHandler = function(request, response, next)
 {
-    var tags = request.path.substr(10).split('/');
+    let tags = request.path.substr(10).split('/');
     request.tags = [];
 
-    for ( var i=0 ; i<tags.length ; i++ ) {
+    for ( let i=0 ; i<tags.length ; i++ ) {
         if ( tags[i] ) {
             request.tags.push(tags[i]);
         }

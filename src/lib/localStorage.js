@@ -1,11 +1,11 @@
-var fs = require('fs');
-var crypto = require('crypto');
-var util = require('util');
+let fs = require('fs');
+let crypto = require('crypto');
+let util = require('util');
 
-var tools = require('./tools');
-var config = require('./config');
+let tools = require('./tools');
+let config = require('./config');
 
-var storagePath = config.get('localStoragePath');
+let storagePath = config.get('localStoragePath');
 
 
 
@@ -14,7 +14,7 @@ exports.delete = function(id) {
     fs.unlink(getFilePath(id), function(){});
 };
 
-var getFilePath = function(id) {
+let getFilePath = function(id) {
     return storagePath + id;
 };
 
@@ -42,7 +42,7 @@ util.inherits(storage, fs.WriteStream);
 function storage(id) {
 
     if ( typeof id==='undefined' ) {
-        var shasum = crypto.createHash('sha512');
+        let shasum = crypto.createHash('sha512');
         shasum.update('$*_salt'+ Math.random());
         id = shasum.digest('hex');
     }
@@ -70,7 +70,7 @@ storage.prototype.location = function() {
 
 storage.prototype.process = function(reader) {
 
-    var that = this;
+    let that = this;
 	
     //fs.exists(storagePath, function(exists) {
     

@@ -8,10 +8,10 @@ const tools = require('../lib/tools'),
     notification = require('../lib/notification');
 
 exports.parse = function(request) {
-    var fileCount = 0;
+    let fileCount = 0;
 
     return new Promise(function(resolve, reject) {
-        var error = false,
+        let error = false,
             formEnded = false,
             form = new multiparty.Form(),
             result = {
@@ -19,7 +19,7 @@ exports.parse = function(request) {
                 parameters: {}
             };
 
-        var endPromiseIfNeeded = function() {
+        let endPromiseIfNeeded = function() {
             if (fileCount > 0 || !formEnded) {
                 return;
             }
@@ -47,7 +47,7 @@ exports.parse = function(request) {
             } else {
                 (function(p) {
                     tools.logger.info('Traitement d un fichier.');
-                    var progress = new notification.ProgressNotification({
+                    let progress = new notification.ProgressNotification({
                         expected: p.byteCount,
                         filename: p.filename
                     });
@@ -55,7 +55,7 @@ exports.parse = function(request) {
 
                     fileCount++;
 
-                    var store = new storage.storage();
+                    let store = new storage.storage();
                     store.on('finish', function() {
                         tools.logger.info('Fin de traitement d un fichier.');
                         result.files.push({

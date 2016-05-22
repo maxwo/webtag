@@ -1,11 +1,11 @@
-var crypto = require('crypto');
+let crypto = require('crypto');
 
-var tools = require('../lib/tools');
-var indexer = require('./indexer');
-var cache = require('./cache');
+let tools = require('../lib/tools');
+let indexer = require('./indexer');
+let cache = require('./cache');
 
-var salt = '$€*_-°';
-var userTemplate = {
+let salt = '$€*_-°';
+let userTemplate = {
 	login: undefined,
 	firstName: '',
 	lastName: '',
@@ -22,10 +22,10 @@ exports.authenticate = function (login, password, fn) {
 	exports.indexer
 		.get(login)
 		.then(function (user) {
-			var shasum = crypto.createHash('sha512');
+			let shasum = crypto.createHash('sha512');
 			shasum.update(salt);
 			shasum.update(password);
-			var hashPassword = shasum.digest('hex');
+			let hashPassword = shasum.digest('hex');
 
 			if ( hashPassword === user.password) {
 				fn(undefined, user);

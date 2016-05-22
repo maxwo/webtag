@@ -75,7 +75,7 @@ exports.errorHandler = function(response) {
     return function(error) {
         console.log('error while processing a request:' + error);
 
-        var status = 500;
+        let status = 500;
 
         if (error && error.context && error.context.notFound) {
             status = 404;

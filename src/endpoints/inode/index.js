@@ -1,14 +1,14 @@
-var express = require('express'),
+let express = require('express'),
     events = require('events'),
     _ = require('underscore');
 
-var storage = require('../../lib/localStorage');
-var tools = require('../../lib/tools');
-var inodeManager = require('../../managers/inode');
+let storage = require('../../lib/localStorage');
+let tools = require('../../lib/tools');
+let inodeManager = require('../../managers/inode');
 
 
 
-var app = module.exports = express();
+let app = module.exports = express();
 
 
 app.get('/api/inode/:id', inodeManager.inodeHandler, function(request, response) {
@@ -19,7 +19,7 @@ app.get('/api/inode/:id', inodeManager.inodeHandler, function(request, response)
 
 app.put('/api/inode/:id', inodeManager.inodeHandler, function(request, response) {
 
-    var inode = _.extend({}, request.inode, request.body);
+    let inode = _.extend({}, request.inode, request.body);
 
     inodeManager
         .indexer

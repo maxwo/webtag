@@ -1,17 +1,17 @@
-var tools = require('./tools'),
+let tools = require('./tools'),
     io = require('socket.io'),
     _ = require('underscore'),
     uuid = require('node-uuid');
 
-var amqp       = require('amqp');
-var config = require('./config');
+let amqp       = require('amqp');
+let config = require('./config');
 
-var exchange;
-var connection;
+let exchange;
+let connection;
 
 exports.initNotification = function(app, server) {
 
-    var socketHandler = io.listen(server);
+    let socketHandler = io.listen(server);
     socketHandler.on('connection', function (socket) {
 
         connection.queue('tmp-' + Math.random(), {
@@ -52,7 +52,7 @@ exports.initNotification = function(app, server) {
 
 };
 
-var notify = function(event, object) {
+let notify = function(event, object) {
 
     exchange.publish(event, {
         event: event,
@@ -60,11 +60,11 @@ var notify = function(event, object) {
     });
 };
 
-var timestamp = function() {
+let timestamp = function() {
     return new Date().getTime();
 };
 
-var ProgressNotification = function(data) {
+let ProgressNotification = function(data) {
     this.latestNotificationTime = 0;
     this.uuid = uuid.v1();
     this.data = _.extend({
@@ -81,10 +81,10 @@ ProgressNotification.prototype.start = function() {
 };
 
 ProgressNotification.prototype.stream = function(stream) {
-    var that = this;
+    let that = this;
     that.data.processed = 0;
     stream.on('data', function(chunk) {
-        var delta = timestamp() - that.latestNotificationTime;
+        let delta = timestamp() - that.latestNotificationTime;
         that.data.processed += chunk.length;
         if ( delta>config.get('amqpEventsRate') ) {
             that.latestNotificationTime += delta;

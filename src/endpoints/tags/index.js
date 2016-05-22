@@ -1,13 +1,13 @@
-var express = require('express'),
+let express = require('express'),
     events = require('events'),
     _ = require('underscore');
 
-var tools = require('../../lib/tools');
-var inodeManager = require('../../managers/inode');
+let tools = require('../../lib/tools');
+let inodeManager = require('../../managers/inode');
 
-var app = module.exports = express();
+let app = module.exports = express();
 
-var facets = {
+let facets = {
     "tags" : {
         "terms" : {
             "field" : "tags",
@@ -18,7 +18,7 @@ var facets = {
 
 app.get('/api/tags/*', inodeManager.tagsHandler, function(request, response) {
 
-    var query = {
+    let query = {
         "bool":
         {
             "must":[]
@@ -41,7 +41,7 @@ app.get('/api/tags/*', inodeManager.tagsHandler, function(request, response) {
         .indexer
         .search(query, 0, 100, facets)
         .then(function(results) {
-            var filtered_tags = _.filter(results.tags, function(tag) {
+            let filtered_tags = _.filter(results.tags, function(tag) {
                 return request.tags.indexOf(tag.tag)===-1;
             });
             response.end(JSON.stringify( {"tags": filtered_tags, "inodes": results.documents} , undefined, 4));

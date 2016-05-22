@@ -2,20 +2,20 @@
  * Created by max on 09/02/15.
  */
 
-var ElasticSearchClient = require('elasticsearchclient');
-var _ = require('underscore');
+let ElasticSearchClient = require('elasticsearchclient');
+let _ = require('underscore');
 
-var tools = require('../lib/tools');
-var config = require('../lib/config');
-var crypto = require('crypto');
+let tools = require('../lib/tools');
+let config = require('../lib/config');
+let crypto = require('crypto');
 
-var serverOptions = {
+let serverOptions = {
     host: config.get('elasticSearchHost'),
     port: config.get('elasticSearchPort')
 };
 
-var client = new ElasticSearchClient(serverOptions);
-var index = config.get('elasticSearchIndex');
+let client = new ElasticSearchClient(serverOptions);
+let index = config.get('elasticSearchIndex');
 
 exports.indexer = function(type, template) {
 
@@ -26,7 +26,7 @@ exports.indexer = function(type, template) {
         index: function(document) {
 
             if (typeof document.id === 'undefined') {
-                var shasum = crypto.createHash('sha512');
+                let shasum = crypto.createHash('sha512');
                 shasum.update('$*_salt' + Math.random());
                 document.id = shasum.digest('hex');
             }
@@ -35,7 +35,7 @@ exports.indexer = function(type, template) {
 
             return new Promise(function(resolve, reject) {
 
-                var ci = client.index(index, type, document, document.id);
+                let ci = client.index(index, type, document, document.id);
                 ci.on('done', function() {
                     tools.logger.info('Indexation of %s %s done.', type, document.id);
                     resolve(document);
@@ -57,7 +57,7 @@ exports.indexer = function(type, template) {
 
             return new Promise(function(resolve, reject) {
 
-                var ci = client.deleteByQuery(index, type, {
+                let ci = client.deleteByQuery(index, type, {
                     query: {
                         term: {
                             id: document.id
@@ -92,9 +92,9 @@ exports.indexer = function(type, template) {
 
             return new Promise(function(resolve, reject) {
 
-                var cs = client.get(index, type, id);
+                let cs = client.get(index, type, id);
                 cs.on('data', function(data) {
-                    var result = JSON.parse(data);
+                    let result = JSON.parse(data);
                     if (result.found) {
                         tools.logger.info('Document %s %s found.', type, id);
                         resolve(result._source);
@@ -126,7 +126,7 @@ exports.indexer = function(type, template) {
 
                 tools.logger.info('Initializing search of %s.', type);
 
-                var sendQuery = {
+                let sendQuery = {
                     "from": from,
                     "size": limit,
                     "query": query
@@ -136,23 +136,23 @@ exports.indexer = function(type, template) {
                     sendQuery.facets = facets;
                 }
 
-                var cs = client.search(index, type, sendQuery);
+                let cs = client.search(index, type, sendQuery);
 
                 cs.on('data', function(data) {
 
-                    var result = JSON.parse(data);
+                    let result = JSON.parse(data);
 
                     console.log(data);
 
-                    var documents = [];
-                    var tags = [];
+                    let documents = [];
+                    let tags = [];
                     if (result.hits.total > 0) {
-                        for (var i = 0; i < result.hits.hits.length; i++) {
+                        for (let i = 0; i < result.hits.hits.length; i++) {
                             documents.push(result.hits.hits[i]._source);
                         }
                     }
                     if (result.facets.tags.terms.length > 0) {
-                        for (var j = 0; j < result.facets.tags.terms.length; j++) {
+                        for (let j = 0; j < result.facets.tags.terms.length; j++) {
                             tags.push({
                                 "tag": result.facets.tags.terms[j].term,
                                 "count": result.facets.tags.terms[j].count
