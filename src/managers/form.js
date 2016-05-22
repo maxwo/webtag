@@ -4,8 +4,8 @@
 
 const tools = require('../lib/tools'),
     multiparty = require('multiparty'),
-    storage = require('../lib/localStorage'),
-    notification = require('../lib/notification');
+    storage = require('../lib/localStorage');
+//notification = require('../lib/notification');
 
 exports.parse = function(request) {
     let fileCount = 0;
@@ -47,11 +47,11 @@ exports.parse = function(request) {
             } else {
                 (function(p) {
                     tools.logger.info('Traitement d un fichier.');
-                    let progress = new notification.ProgressNotification({
+                    /*let progress = new notification.ProgressNotification({
                         expected: p.byteCount,
                         filename: p.filename
                     });
-                    progress.start();
+                    progress.start();*/
 
                     fileCount++;
 
@@ -66,7 +66,7 @@ exports.parse = function(request) {
                             'location': store.location()
                         });
 
-                        progress.end();
+                        //progress.end();
                         fileCount--;
 
                         endPromiseIfNeeded();
@@ -77,7 +77,7 @@ exports.parse = function(request) {
                     });
 
                     store.process(p);
-                    progress.stream(p);
+                    //progress.stream(p);
 
                 })(part);
             }

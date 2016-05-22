@@ -9,10 +9,10 @@ import notification from './lib/notification';
 import { logger as log, errorHandler } from './lib/tools';
 import config from './lib/config';
 
-import { postDataProcessor, postDataMiddlewares } from './endpoints/data';
-import inodeEndPoint from './endpoints/inode';
-import userEndPoint from './endpoints/user';
-import tagsEndPoint from './endpoints/tags';
+import initDataEndPoints from './endpoints/data';
+//import inodeEndPoint from './endpoints/inode';
+//import userEndPoint from './endpoints/user';
+//import tagsEndPoint from './endpoints/tags';
 
 const options = {
     key: fs.readFileSync(config.get('httpsKey')),
@@ -26,6 +26,11 @@ const options = {
 const app = express();
 const server = https.createServer(options, app);
 
+// app.use(express.methodOverride());
+app.use(logger({
+    path: 'access.log',
+}));
+
 // app.use(express.basicAuth( userManager.authenticate ));
 app.use((request, response, next) => {
     const userName = request.socket.getPeerCertificate().subject.CN;
@@ -34,19 +39,21 @@ app.use((request, response, next) => {
         login: userName,
         groups: [],
     };
-    return next();
+    next();
 });
-// app.use(express.methodOverride());
-app.use(logger({
-    path: 'logfile.txt',
-}));
 
-//app.get('/*', express.static(path.join(__dirname, 'static')));
+// app.use(express.basicAuth( userManager.authenticate ));
+app.use((request, response, next) => {
+    console.log(request.user);
+    next();
+});
+
+// app.get('/*', express.static(path.join(__dirname, 'static')));
 
 app.use('/api/user/', bodyParser.json());
 app.use('/api/inode/', bodyParser.json());
 app.use('/api/tags/', bodyParser.json());
-/*app.use(function(error, request, response, next) {
+app.use(function(error, request, response, next) {
     if (!error) {
         return next();
     }
@@ -54,20 +61,9 @@ app.use('/api/tags/', bodyParser.json());
         error: true,
         source: error,
     });
-});*/
+});
 
-const loadEndPoint = function(endPoint, processor, middlewares) {
-    const endPointArgs = [];
-    endPointArgs.push(endPoint);
-    if (middlewares) {
-        endPointArgs.push.apply(endPointArgs, middlewares);
-    }
-    endPointArgs.push(processor);
-    app.post.apply(app, endPointArgs);
-};
-
-loadEndPoint('/api/data', function() {}, [function() {}]);
-
+initDataEndPoints(app);
 // app.post('/api/data', )
 // app.use(dataEndPoint);
 // app.use(inodeEndPoint);

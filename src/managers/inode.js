@@ -1,42 +1,34 @@
-let indexer = require('./indexer');
-let tools = require('../lib/tools');
+import Indexer from './indexer';
+import { errorHandler } from '../lib/tools';
 
-let inodeTemplate = {
+const inodeTemplate = {
     id: undefined,
     tags: [],
     metadata: [],
     owner: '',
-    groups: []
+    groups: [],
 };
 
 
-exports.indexer = indexer.indexer('inode', inodeTemplate);
+export const inodeIndexer = new Indexer('inode', inodeTemplate);
 
-exports.inodeHandler = function(request, response, next) {
+export function inodeHandler(request, response, next) {
 
-    let id = request.params.id;
+    const id = request.params.id;
 
-    exports
-        .indexer
+    inodeIndexer
         .get(id)
-        .then(function(inode) {
+        .then((inode) => {
+            console.log('rzerarez');
             request.inode = inode;
             next();
         })
-        .catch(tools.errorHandler(response))
+        .catch(errorHandler(response));
+}
 
-};
-
-exports.tagsHandler = function(request, response, next)
-{
-    let tags = request.path.substr(10).split('/');
-    request.tags = [];
-
-    for ( let i=0 ; i<tags.length ; i++ ) {
-        if ( tags[i] ) {
-            request.tags.push(tags[i]);
-        }
-    }
+export function tagsHandler(request, response, next) {
+    const tags = request.path.substr(10).split('/');
+    request.tags = tags.filter((tag) => typeof tag !== 'undefined');
 
     next();
-};
+}

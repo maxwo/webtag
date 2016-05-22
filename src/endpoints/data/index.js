@@ -1,48 +1,59 @@
 import form from '../../managers/form';
 import storage from '../../lib/localStorage';
 import tools from '../../lib/tools';
-import inodeManager from '../../managers/inode';
+import { inodeIndexer, inodeHandler } from '../../managers/inode';
 
-tools.logger.info('Initializing data end point.');
+function postData(request, response) {
 
-export const postDataMiddlewares = [inodeManager.inodeHandler];
-export function postDataProcessor(request, response) {
     // Store all the files
     form.parse(request)
 
-    // Index all the files
-    .then((data) => {
-        const tags = data.parameters.tags ? data.parameters.tags.split(',') : [];
-        const promises = [];
+        // Index all the files
+        .then((data) => {
+            const tags = data.parameters.tags ? data.parameters.tags.split(',') : [];
+            const promises = [];
 
-        for (const file of data.file) {
-            promises.push(inodeManager.indexer.index({
-                filename: file.filename,
-                tags,
-                owner: request.user.login,
-                groups: request.user.groups,
-                file,
-            }));
-        }
+            if (!data.files) {
+                console.log('dkfjslqkjfkqsjfkldq');
+                    console.log(data);
+                throw new tools.DocumentError();
+            }
 
-        return Promise.all(promises);
-    })
+            for (const file of data.files) {
+                promises.push(inodeIndexer.index({
+                    filename: file.filename,
+                    tags,
+                    owner: request.user.login,
+                    groups: request.user.groups,
+                    file,
+                }));
+            }
 
-    // Send inodes to client
-    .then((inodes) => {
-        response.json(201, inodes);
-    })
+            return Promise.all(promises);
+        })
 
-    .catch(tools.errorHandler(response));
+        // Send inodes to client
+        .then((inodes) => {
+            response
+                .status(201)
+                .send(inodes);
+        })
+
+        .catch(tools.errorHandler(response));
 }
 
-export const getDataMiddlewares = [inodeManager.inodeHandler];
-export function getData(request, response) {
+function getData(request, response) {
     const s = new storage.retrieval(request.inode.file.id);
     s.on('error', tools.errorHandler(response));
     s.pipe(response);
 }
 
+export default function initDataEndPoints(app) {
+    tools.logger.info('Initializing data end points.');
+    app.post('/api/data/', postData);
+    app.get('/api/data/:id', inodeHandler, getData);
+    tools.logger.info('End initialization data end points.');
+}
 
 /*
 app.put('/api/data/:id', inodeManager.inodeHandler, function(request, response) {

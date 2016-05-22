@@ -74,6 +74,8 @@ exports.DataError = function(stream, context) {
 exports.errorHandler = function(response) {
     return function(error) {
         console.log('error while processing a request:' + error);
+        console.log(error);
+        console.log(error.stack);
 
         let status = 500;
 
