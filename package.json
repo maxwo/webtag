@@ -8,29 +8,16 @@
     "http-server": "server.js"
   },
   "scripts": {
-    "start": "babel-node server.js --presets es2015,stage-2",
-    "install": "brew install elasticsearch redis rabbitmq tesseract",
+    "start": "babel-node index.js --presets es2015,stage-2",
+    "install": "brew install elasticsearch redis rabbitmq tesseract --with-all-languages",
     "adduser": "node ./adduser.js"
   },
-  "main": "server.js",
+  "main": "index.js",
   "repository": {
     "type": "git",
     "url": "https://github.com/maxwo/webtag.git"
   },
   "keywords": [],
-  "dependenciesdd": {
-    "express": "3.X",
-    "multiparty": "3.X",
-    "underscore": "1.5.X",
-    "elasticsearchclient": "0.5.X",
-    "winston": "0.7.X",
-    "nconf": "0.6.X",
-    "prompt": "0.2.X",
-    "socket.io": "0.9.X",
-    "amqp": "X",
-    "redis": "0.12.X",
-    "node-uuid": "1.X"
-  },
   "engines": {
     "node": ">=0.8"
   },
@@ -42,8 +29,19 @@
     "eslint-config-airbnb": "^9.0.1"
   },
   "dependencies": {
+    "amqp": "^0.2.4",
     "body-parser": "^1.15.1",
+    "elasticsearchclient": "^0.5.3",
+    "express": "^4.13.4",
     "express-logger": "0.0.3",
-    "underscore": "^1.8.3"
+    "multiparty": "^4.1.2",
+    "nconf": "^0.8.4",
+    "node-tesseract": "^0.2.7",
+    "node-uuid": "^1.4.7",
+    "prompt": "^1.0.0",
+    "redis": "^2.5.3",
+    "socket.io": "^1.4.6",
+    "underscore": "^1.8.3",
+    "winston": "^2.2.0"
   }
 }

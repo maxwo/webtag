@@ -1,6 +1,6 @@
 var crypto = require('crypto');
 
-var tools = require('../tools');
+var tools = require('../lib/tools');
 var indexer = require('./indexer');
 var cache = require('./cache');
 

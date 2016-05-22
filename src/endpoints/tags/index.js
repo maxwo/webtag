@@ -2,8 +2,8 @@ var express = require('express'),
     events = require('events'),
     _ = require('underscore');
 
-var tools = require('../tools');
-var inodeManager = require('../managers/inode');
+var tools = require('../../lib/tools');
+var inodeManager = require('../../managers/inode');
 
 var app = module.exports = express();
 

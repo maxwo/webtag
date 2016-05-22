@@ -4,7 +4,7 @@ nconf
 		.argv()
     .env()
     .file({
-        file: 'etc/config.json',
+        file: '/etc/webtag/config.json',
     })
     .file({
         file: 'etc/defaults.json',

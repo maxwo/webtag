@@ -2,9 +2,9 @@ var express = require('express'),
     events = require('events'),
     _ = require('underscore');
 
-var storage = require('../localStorage');
-var tools = require('../tools');
-var inodeManager = require('../managers/inode');
+var storage = require('../../lib/localStorage');
+var tools = require('../../lib/tools');
+var inodeManager = require('../../managers/inode');
 
 
 
@@ -46,4 +46,3 @@ app.delete('/api/inode/:id', inodeManager.inodeHandler, function(request, respon
         .catch(tools.errorHandler(response));
 
 });
-

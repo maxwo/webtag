@@ -2,8 +2,8 @@ var express = require('express'),
     http = require('http'),
     events = require('events');
 
-var userManager = require('../managers/user');
-var tools = require('../tools');
+var userManager = require('../../managers/user');
+var tools = require('../../lib/tools');
 
 var app = module.exports = express();
 

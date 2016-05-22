@@ -5,11 +5,16 @@
 
     "localStoragePath": "/Users/max/files/",
 
-    "httpHost": "localhost",
-    "httpPort": 4433,
+    "httpsHost": "localhost",
+    "httpsPort": 4433,
+    "httpsKey": "etc/certificates/server/server-key.pem",
+    "httpsCert": "etc/certificates/server/server-crt.pem",
+    "httpsCA": "etc/certificates/ca/ca-crt.pem",
+    "httpsCRL": "etc/certificates/ca/ca-crl.pem",
 
     "redisHost": "127.0.0.1",
     "redisPort": 6379,
+    "redisTimeout": 2,
 
     "amqpHost": "127.0.0.1",
     "amqpPort": 5672,

@@ -2,10 +2,10 @@
  * Created by max on 10/02/15.
  */
 
-const tools = require('../tools'),
+const tools = require('../lib/tools'),
     multiparty = require('multiparty'),
-    storage = require('../localStorage'),
-    notification = require('../notification');
+    storage = require('../lib/localStorage'),
+    notification = require('../lib/notification');
 
 exports.parse = function(request) {
     var fileCount = 0;

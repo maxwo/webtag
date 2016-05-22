@@ -5,8 +5,8 @@
 var ElasticSearchClient = require('elasticsearchclient');
 var _ = require('underscore');
 
-var tools = require('../tools');
-var config = require('../config');
+var tools = require('../lib/tools');
+var config = require('../lib/config');
 var crypto = require('crypto');
 
 var serverOptions = {
@@ -25,9 +25,9 @@ exports.indexer = function(type, template) {
 
         index: function(document) {
 
-            if ( typeof document.id==='undefined' ) {
+            if (typeof document.id === 'undefined') {
                 var shasum = crypto.createHash('sha512');
-                shasum.update('$*_salt'+ Math.random());
+                shasum.update('$*_salt' + Math.random());
                 document.id = shasum.digest('hex');
             }
 
@@ -42,7 +42,9 @@ exports.indexer = function(type, template) {
                 });
                 ci.on('error', function(error) {
                     tools.logger.error('Error while indexing %s %s.', type, document.id);
-                    reject( new tools.DocumentError(document, {source: error}) );
+                    reject(new tools.DocumentError(document, {
+                        source: error
+                    }));
                 });
                 tools.logger.info('Indexation of %s %s ready.', type, document.id);
                 ci.exec();
@@ -55,15 +57,29 @@ exports.indexer = function(type, template) {
 
             return new Promise(function(resolve, reject) {
 
-                var ci = client.deleteByQuery(index, type, {query:{term:{id:document.id}}});
-                console.log({query:{term:{id:document.id}}});
+                var ci = client.deleteByQuery(index, type, {
+                    query: {
+                        term: {
+                            id: document.id
+                        }
+                    }
+                });
+                console.log({
+                    query: {
+                        term: {
+                            id: document.id
+                        }
+                    }
+                });
                 ci.on('done', function() {
                     tools.logger.info('Deletion of %s %s done.', type, document.id);
                     resolve(document.id);
                 });
                 ci.on('error', function(error) {
                     tools.logger.error(error);
-                    reject( new tools.DocumentError(document, {source: error}) );
+                    reject(new tools.DocumentError(document, {
+                        source: error
+                    }));
                 });
                 tools.logger.info('Deletion of %s %s ready.', type, document.id);
                 ci.exec();
@@ -79,17 +95,23 @@ exports.indexer = function(type, template) {
                 var cs = client.get(index, type, id);
                 cs.on('data', function(data) {
                     var result = JSON.parse(data);
-                    if ( result.found ) {
+                    if (result.found) {
                         tools.logger.info('Document %s %s found.', type, id);
                         resolve(result._source);
                     } else {
                         tools.logger.info('Document %s %s not found.', type, id);
-                        reject( new tools.DocumentError({id: id}, {notFound: true}));
+                        reject(new tools.DocumentError({
+                            id: id
+                        }, {
+                            notFound: true
+                        }));
                     }
                 });
                 cs.on('error', function(error) {
                     tools.logger.info('error while getting %s %s', type, id);
-                    reject( new tools.DocumentError(document, {source: error} ));
+                    reject(new tools.DocumentError(document, {
+                        source: error
+                    }));
                 });
                 cs.exec();
                 tools.logger.info('Retrieval of %s %s ready.', type, id);
@@ -105,12 +127,12 @@ exports.indexer = function(type, template) {
                 tools.logger.info('Initializing search of %s.', type);
 
                 var sendQuery = {
-                    "from" : from,
-                    "size" : limit,
-                    "query" : query
+                    "from": from,
+                    "size": limit,
+                    "query": query
                 };
 
-                if ( facets ) {
+                if (facets) {
                     sendQuery.facets = facets;
                 }
 
@@ -124,21 +146,29 @@ exports.indexer = function(type, template) {
 
                     var documents = [];
                     var tags = [];
-                    if ( result.hits.total>0 ) {
-                        for ( var i=0 ; i<result.hits.hits.length  ; i++ ) {
+                    if (result.hits.total > 0) {
+                        for (var i = 0; i < result.hits.hits.length; i++) {
                             documents.push(result.hits.hits[i]._source);
                         }
                     }
-                    if ( result.facets.tags.terms.length>0 ) {
-                        for ( var j=0 ; j<result.facets.tags.terms.length ; j++ ) {
-                            tags.push({ "tag" : result.facets.tags.terms[j].term , "count" : result.facets.tags.terms[j].count });
+                    if (result.facets.tags.terms.length > 0) {
+                        for (var j = 0; j < result.facets.tags.terms.length; j++) {
+                            tags.push({
+                                "tag": result.facets.tags.terms[j].term,
+                                "count": result.facets.tags.terms[j].count
+                            });
                         }
                     }
-                    resolve({documents: documents, tags: tags});
+                    resolve({
+                        documents: documents,
+                        tags: tags
+                    });
                 });
                 cs.on('error', function(error) {
                     tools.logger.info('Error while searching %s.', type);
-                    reject( new tools.Error({source: error}) );
+                    reject(new tools.Error({
+                        source: error
+                    }));
                 });
                 cs.exec();
 

@@ -1,5 +1,5 @@
 var indexer = require('./indexer');
-var tools = require('../tools');
+var tools = require('../lib/tools');
 
 var inodeTemplate = {
     id: undefined,
