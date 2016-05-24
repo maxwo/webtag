@@ -10,8 +10,7 @@ import { logger as log, errorHandler } from './lib/tools';
 import config from './lib/config';
 
 import initDataEndPoints from './endpoints/data';
-//import inodeEndPoint from './endpoints/inode';
-//import userEndPoint from './endpoints/user';
+import initInodeEndPoints from './endpoints/inode';
 //import tagsEndPoint from './endpoints/tags';
 
 const options = {
@@ -58,14 +57,10 @@ app.use((error, request, response, next) => {
 });
 
 initDataEndPoints(app);
-// app.post('/api/data', )
-// app.use(dataEndPoint);
-// app.use(inodeEndPoint);
-// app.use(userEndPoint);
-// app.use(tagsEndPoint);
+initInodeEndPoints(app);
 
 const initPromises = [
-    initNotification(app, server),
+    initNotification(),
 ];
 
 Promise

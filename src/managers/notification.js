@@ -5,10 +5,20 @@ import { createChannel, createQueue, createTopic } from '../lib/amqp';
 let amqpChannel;
 
 function notifyUsers(inode, buffer) {
+    log.info(`Notifying user ${inode.owner}`);
     amqpChannel.publish('events', `user.${inode.owner}`, buffer);
+
+    for (const g of inode.groups) {
+        log.info(`Notifying group ${g}`);
+        amqpChannel.publish('events', `group.${g}`, buffer);
+    }
 }
 
-export function receivingFile() {
+export function receivingFile(user, id, fileName) {
+    const buffer = new Buffer(JSON.stringify({
+        id,
+        fileName,
+    }));
 }
 
 export function inodeSaved(inode) {
@@ -57,4 +67,8 @@ export function initNotification() {
             log.info('Working queues created');
         })
         .catch(log.error);
+}
+
+export function getChannel() {
+    return amqpChannel;
 }

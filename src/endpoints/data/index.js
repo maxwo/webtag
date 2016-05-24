@@ -2,7 +2,7 @@ import parse from '../../lib/form';
 import storage from '../../lib/localStorage';
 import { logger as log, errorHandler } from '../../lib/tools';
 import mime from 'mime-types';
-import { inodeIndexer, inodeHandler } from '../../managers/inode';
+import { inodeIndexer, inodeHandler, cleanUpInode } from '../../managers/inode';
 import { inodeSaved } from '../../managers/notification';
 
 function postData(request, response) {
@@ -17,8 +17,8 @@ function postData(request, response) {
         if (data.parameters.tags) {
             tags.push.apply(tags,
                 data.parameters.tags.split(',')
-                .map((tag) => tag.trim())
-                .filter((tag) => tag !== ''));
+                    .map((tag) => tag.trim())
+                    .filter((tag) => tag !== ''));
         }
 
         if (data.files) {
@@ -41,7 +41,7 @@ function postData(request, response) {
     .then((inodes) => {
         response
             .status(201)
-            .send(JSON.stringify(inodes, null, 4));
+            .send(JSON.stringify(inodes.map((i) => cleanUpInode(i)), null, 4));
 
         inodes.forEach(inodeSaved);
     })
@@ -61,31 +61,3 @@ export default function initDataEndPoints(app) {
     app.get('/api/data/:id', inodeHandler, getData);
     log.info('End initialization data end points.');
 }
-
-/*
-app.put('/api/data/:id', inodeManager.inodeHandler, function(request, response) {
-
-    tools.logger.info('PUT on %s.', request.inode.id);
-
-    let inode = request.inode;
-
-    let store = new storage.storage(inode.id);
-    store.on('finish', function() {
-
-        inode['size'] = store.size();
-        inode['location'] = store.location();
-
-        indexer.indexInode(inode, function(inode) {
-            response.json(inode);
-            response.end();
-        } , tools.errorHandler(response), request.inode.id);
-
-    });
-    store.on('error', tools.errorHandler(response));
-
-    store.process(request);
-
-    notification.notifyProgress(request);
-
-});
-*/

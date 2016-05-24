@@ -25,17 +25,11 @@ export function listenTopic(channel, topicName, routingKey, onMessage) {
         }))
         .then((qok) => {
             const bindQueuePromises = routingKey
-                .map((rk) => {
-                    channel.bindQueue(qok.queue, topicName, rk)
-                });
+                .map((rk) => channel.bindQueue(qok.queue, topicName, rk));
+
             return Promise
                 .all(bindQueuePromises)
                 .then(() => qok.queue);
-            
-            return channel.bindQueue(qok.queue, topicName, routingKey)
-                .then(() => {
-                    return qok.queue;
-                });
         })
         .then((queue) => {
             log.info(`Listening to topic ${topicName}...`);
@@ -86,6 +80,15 @@ export function createQueue(channel, queueName) {
         .assertQueue(queueName)
         .then(() => {
             log.info(`Queue ${queueName} created.`);
+        })
+        .catch(log.error);
+}
+
+export function listenQueue(channel, queueName, onMessage) {
+    log.info(`Listen to queue ${queueName}.`);
+    return channel
+        .consume('imageIndexation', onMessage, {
+            noAck: false,
         })
         .catch(log.error);
 }

@@ -1,48 +1,44 @@
-let express = require('express'),
-    events = require('events'),
-    _ = require('underscore');
+import storage from '../../lib/localStorage';
+import { logger as log, errorHandler } from '../../lib/tools';
+import { inodeIndexer, inodeHandler,
+         cleanUpInode, checkInodeModification } from '../../managers/inode';
 
-let storage = require('../../lib/localStorage');
-let tools = require('../../lib/tools');
-let inodeManager = require('../../managers/inode');
+function getInode(request, response) {
+    response.end(JSON.stringify(cleanUpInode(request.inode)));
+}
 
+function putInode(request, response) {
+    if (!checkInodeModification(request.body, request.inode)) {
+        response
+            .status(401);
+    } else {
+        const inode = Object.assign({}, request.inode, request.body);
 
+        inodeIndexer
+            .index(inode)
+            .then(() => {
+                response.write(JSON.stringify(cleanUpInode(request.inode), null, 4));
+                response.end();
+            })
+            .catch(errorHandler(response));
+    }
+}
 
-let app = module.exports = express();
-
-
-app.get('/api/inode/:id', inodeManager.inodeHandler, function(request, response) {
-
-    response.end(JSON.stringify(request.inode));
-
-});
-
-app.put('/api/inode/:id', inodeManager.inodeHandler, function(request, response) {
-
-    let inode = _.extend({}, request.inode, request.body);
-
-    inodeManager
-        .indexer
-        .index(inode)
-        .then(function() {
-            response.write(JSON.stringify(inode, null, 4));
-            response.end();
-        })
-        .catch(tools.errorHandler(response));
-
-});
-
-app.delete('/api/inode/:id', inodeManager.inodeHandler, function(request, response) {
-
-    inodeManager
-        .indexer
+function deleteInode(request, response) {
+    inodeIndexer
         .delete(request.inode)
-        .then(function() {
-            console.log('OK!!!');
+        .then(() => {
             response.write('');
             response.end();
             storage.delete(request.inode.id);
         })
-        .catch(tools.errorHandler(response));
+        .catch(errorHandler(response));
+}
 
-});
+export default function initInodeEndPoints(app) {
+    log.info('Initializing inode end points.');
+    app.get('/api/inode/:id', inodeHandler, getInode);
+    app.put('/api/inode/:id', inodeHandler, putInode);
+    app.delete('/api/inode/:id', inodeHandler, deleteInode);
+    log.info('End initialization inode end points.');
+}

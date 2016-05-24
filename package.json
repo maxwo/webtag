@@ -34,6 +34,7 @@
     "amqp": "^0.2.4",
     "amqplib": "^0.4.1",
     "body-parser": "^1.15.1",
+    "deep-equal": "^1.0.1",
     "elasticsearchclient": "^0.5.3",
     "express": "^4.13.4",
     "express-logger": "0.0.3",

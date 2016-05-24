@@ -1,8 +1,8 @@
 import ocr from '../lib/ocr';
-import config from '../lib/config';
 import { logger as log } from '../lib/tools';
 import { inodeIndexer } from '../managers/inode';
-import amqplib from 'amqplib';
+import { initNotification, getChannel, inodeIndexed } from '../managers/notification';
+import { listenQueue } from '../lib/amqp';
 
 const imageContentTypes = [
     'image/bmp',
@@ -24,46 +24,43 @@ function indexInode(message) {
     inodeIndexer
         .get(id)
         .then((inode) => {
+            let result = null;
             // Check if this is an image
             if (imageContentTypes.indexOf(inode.contentType) !== -1) {
                 const fileName = inode.file.location.substr(7);
                 // If so, OCR it
                 log.info(`OCR of inode:file ${id}:${fileName}`);
 
-                return ocr(fileName)
+                result = ocr(fileName)
                     .then((text) => {
                         log.info(`OCR of inode ${id} done.`);
                         inode.textContent = text;
-                        inodeIndexer.index(inode);
+                        inode.states.indexed = true;
+                        return inodeIndexer.index(inode);
+                    })
+                    .then(() => {
+                        inodeIndexed(inode);
                     })
                     .catch((err) => {
                         log.error(`Error while OCR of ${id}: ${err}`);
                     });
             } else {
                 log.info(`Inode ${id} not an image, nothing to do...`);
-                return null;
             }
-        })
-        .then(() => {})
 
+            return result;
+        })
 }
 
-function initQueue() {
-    log.info('Connecting to AMQP on %s', config.get('amqpHost'));
-    amqplib
-        .connect(config.get('amqpHost'))
-        .then((connection) => {
-            connection
-                .createChannel()
-                .then((chan) => {
-                    channel = chan;
-                    channel.consume('imageIndexation', indexInode, {
-                        noAck: false,
-                    });
-                })
-        })
-        .catch(console.error);
-}
-
-log.info('Preparing an indexation worker.');
-initQueue();
+log.info('Preparing an indexation worker...');
+initNotification()
+    .then(() => {
+        channel = getChannel();
+        return listenQueue(channel, 'imageIndexation', indexInode);
+    })
+    .then(() => {
+        log.info('Indexation worker running, waiting for inodes...');
+    })
+    .catch((error) => {
+        log.error(error);
+    });

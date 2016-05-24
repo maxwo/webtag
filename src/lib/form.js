@@ -58,7 +58,7 @@ export default function parse(request) {
 
                     fileCount++;
 
-                    receivingFile(file);
+                    receivingFile(request.user, store.id(), p.filename);
 
                     store.on('finish', () => {
                         file.size = store.size();
