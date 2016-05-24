@@ -5,7 +5,7 @@ const options = {
     binary: '/usr/local/bin/tesseract',
 };
 
-export const ocr = function (image) {
+export default function ocr(image) {
     return new Promise((resolve, reject) => {
         tesseract.process(image, options, (err, text) => {
             if (err) {
@@ -15,4 +15,4 @@ export const ocr = function (image) {
             }
         });
     });
-};
+}

@@ -1,58 +1,65 @@
-import form from '../../managers/form';
+import parse from '../../lib/form';
 import storage from '../../lib/localStorage';
-import tools from '../../lib/tools';
+import { logger as log, errorHandler } from '../../lib/tools';
+import mime from 'mime-types';
 import { inodeIndexer, inodeHandler } from '../../managers/inode';
+import { inodeSaved } from '../../managers/notification';
 
 function postData(request, response) {
+    // Store the files
+    parse(request)
 
-    // Store all the files
-    form.parse(request)
+    // Save the inodes
+    .then((data) => {
+        const tags = [];
+        const promises = [];
 
-        // Index all the files
-        .then((data) => {
-            const tags = data.parameters.tags ? data.parameters.tags.split(',') : [];
-            const promises = [];
+        if (data.parameters.tags) {
+            tags.push.apply(tags,
+                data.parameters.tags.split(',')
+                .map((tag) => tag.trim())
+                .filter((tag) => tag !== ''));
+        }
 
-            if (!data.files) {
-                console.log('dkfjslqkjfkqsjfkldq');
-                    console.log(data);
-                throw new tools.DocumentError();
-            }
-
+        if (data.files) {
             for (const file of data.files) {
                 promises.push(inodeIndexer.index({
                     filename: file.filename,
+                    contentType: mime.lookup(file.filename),
                     tags,
                     owner: request.user.login,
                     groups: request.user.groups,
                     file,
                 }));
             }
+        }
 
-            return Promise.all(promises);
-        })
+        return Promise.all(promises);
+    })
 
-        // Send inodes to client
-        .then((inodes) => {
-            response
-                .status(201)
-                .send(inodes);
-        })
+    // Send inodes to client
+    .then((inodes) => {
+        response
+            .status(201)
+            .send(JSON.stringify(inodes, null, 4));
 
-        .catch(tools.errorHandler(response));
+        inodes.forEach(inodeSaved);
+    })
+
+    .catch(errorHandler);
 }
 
 function getData(request, response) {
     const s = new storage.retrieval(request.inode.file.id);
-    s.on('error', tools.errorHandler(response));
+    s.on('error', errorHandler(response));
     s.pipe(response);
 }
 
 export default function initDataEndPoints(app) {
-    tools.logger.info('Initializing data end points.');
+    log.info('Initializing data end points.');
     app.post('/api/data/', postData);
     app.get('/api/data/:id', inodeHandler, getData);
-    tools.logger.info('End initialization data end points.');
+    log.info('End initialization data end points.');
 }
 
 /*

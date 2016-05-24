@@ -16,12 +16,16 @@
     "redisPort": 6379,
     "redisTimeout": 2,
 
-    "amqpHost": "127.0.0.1",
+    "amqpHost": "amqp://localhost",
     "amqpPort": 5672,
-    "amqpEventsRate": 500,
-    "amqpEventsExchangeName": "events",
-    "amqpEventsExchangeParameters": {
+
+    "amqpClientsEventsRate": 500,
+    "amqpClientsEventsExchangeName": "clientEvents",
+    "amqpClientsEventsExchangeParameters": {
         "durable": true,
         "autoDelete": false
-    }
+    },
+
+    "amqpWorkerEnventsRare": 500,
+    "amqpClientsEventsExchangeName": "worker"
 }

@@ -3,7 +3,7 @@
  */
 
 import ElasticSearchClient from 'elasticsearchclient';
-import crypto from 'crypto';
+import uuid from 'node-uuid';
 
 import { logger as log, DocumentError, Error } from '../lib/tools';
 import config from '../lib/config';
@@ -24,18 +24,16 @@ export default class Indexer {
     }
 
     index(document) {
-        console.log('***************');
-        console.log(document);
         if (typeof document.id === 'undefined') {
-            const shasum = crypto.createHash('sha512');
-            shasum.update('$*_salt');
-            shasum.update(''+Math.random());
-
-            document.id = shasum.digest('hex');
+            document.id = uuid.v4();
         }
 
         document = Object.assign({}, this.template, document);
-        console.log(document);
+        document.uploadDate = document.file.uploadDate;
+        document.indexedDate = new Date();
+        document.states.received = true;
+
+        document.file.uploadDate = undefined;
 
         return new Promise((resolve, reject) => {
             const ci = client.index(index, this.type, document, document.id);

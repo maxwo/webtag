@@ -1,6 +1,7 @@
 let fs = require('fs');
 let crypto = require('crypto');
 let util = require('util');
+import uuid from 'node-uuid';
 
 let tools = require('./tools');
 let config = require('./config');
@@ -11,7 +12,7 @@ let storagePath = config.get('localStoragePath');
 
 
 exports.delete = function(id) {
-    fs.unlink(getFilePath(id), function(){});
+    fs.unlink(getFilePath(id), function() {});
 };
 
 let getFilePath = function(id) {
@@ -27,7 +28,7 @@ util.inherits(retrieval, fs.ReadStream);
  */
 function retrieval(id) {
     this._id = id;
-	this._fullPath = getFilePath(this._id);
+    this._fullPath = getFilePath(this._id);
 
     fs.ReadStream.apply(this, [this._fullPath]);
 }
@@ -41,18 +42,16 @@ util.inherits(storage, fs.WriteStream);
 
 function storage(id) {
 
-    if ( typeof id==='undefined' ) {
-        let shasum = crypto.createHash('sha512');
-        shasum.update('$*_salt'+ Math.random());
-        id = shasum.digest('hex');
+    if (typeof id === 'undefined') {
+        id = uuid.v4();
     }
 
-	this._id = id;
-	this._fullPath = getFilePath(this._id);
+    this._id = id;
+    this._fullPath = getFilePath(this._id);
 
-	tools.logger.info('Destination file: '+ this._fullPath);
+    tools.logger.info('Destination file: ' + this._fullPath);
 
-	fs.WriteStream.apply(this, [this._fullPath]);
+    fs.WriteStream.apply(this, [this._fullPath]);
 
 }
 
@@ -65,33 +64,33 @@ storage.prototype.size = function() {
 };
 
 storage.prototype.location = function() {
-    return 'file://'+ this._fullPath;
+    return 'file://' + this._fullPath;
 };
 
 storage.prototype.process = function(reader) {
 
     let that = this;
-	
+
     //fs.exists(storagePath, function(exists) {
-    
-        /*if ( !exists ) {
+
+    /*if ( !exists ) {
 			tools.logger.error('%s does not exist.', storagePath);
             that.emit('error', new tools.DataError(storagePath));
             return;
         }*/
 
-	    that.on('error', that.clean);
-	    that.on('finish', function() {
-	        tools.logger.info('file %s done.', that._fullPath);
-	    });
+    that.on('error', that.clean);
+    that.on('finish', function() {
+        tools.logger.info('file %s done.', that._fullPath);
+    });
 
-		tools.logger.info('writing file %s.', that._fullPath);
+    tools.logger.info('writing file %s.', that._fullPath);
 
-        reader.on('end', function() {
-            that.end();
-        });
-		return reader.pipe(that);
-    
+    reader.on('end', function() {
+        that.end();
+    });
+    return reader.pipe(that);
+
     //});
 
 };
@@ -101,7 +100,7 @@ storage.prototype.clean = function() {
         this.end();
     } catch (e) {}
     try {
-        fs.unlink(this._fullPath, function(){});
+        fs.unlink(this._fullPath, function() {});
     } catch (e) {}
 };
 
@@ -119,6 +118,6 @@ exports.storage = storage;
 
 exports.delete = function(id) {
 
-    fs.unlink( getFilePath(id) , function(){});
+    fs.unlink(getFilePath(id), function() {});
 
 };

@@ -1,12 +1,27 @@
-import Indexer from './indexer';
+import Indexer from '../lib/indexer';
 import { errorHandler } from '../lib/tools';
 
 const inodeTemplate = {
     id: undefined,
+    filename: undefined,
+    contentType: undefined,
+    size: undefined,
+    location: undefined,
     tags: [],
     metadata: [],
-    owner: '',
+    owner: undefined,
     groups: [],
+    uploadDate: undefined,
+    indexedDate: undefined,
+    archivedDate: undefined,
+    deletionDate: undefined,
+    documentDate: undefined,
+    states: {
+        received: false,
+        indexed: false,
+        archived: false,
+        deleted: false,
+    },
 };
 
 
@@ -19,7 +34,6 @@ export function inodeHandler(request, response, next) {
     inodeIndexer
         .get(id)
         .then((inode) => {
-            console.log('rzerarez');
             request.inode = inode;
             next();
         })

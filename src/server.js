@@ -5,7 +5,7 @@ import path from 'path';
 import fs from 'fs';
 import https from 'https';
 
-import notification from './lib/notification';
+import { initNotification } from './managers/notification';
 import { logger as log, errorHandler } from './lib/tools';
 import config from './lib/config';
 
@@ -42,22 +42,16 @@ app.use((request, response, next) => {
     next();
 });
 
-// app.use(express.basicAuth( userManager.authenticate ));
-app.use((request, response, next) => {
-    console.log(request.user);
-    next();
-});
-
-// app.get('/*', express.static(path.join(__dirname, 'static')));
+app.get('/*', express.static(path.join(__dirname, 'static')));
 
 app.use('/api/user/', bodyParser.json());
 app.use('/api/inode/', bodyParser.json());
 app.use('/api/tags/', bodyParser.json());
-app.use(function(error, request, response, next) {
+app.use((error, request, response, next) => {
     if (!error) {
         return next();
     }
-    errorHandler(response)({
+    return errorHandler(response)({
         error: true,
         source: error,
     });
@@ -70,8 +64,14 @@ initDataEndPoints(app);
 // app.use(userEndPoint);
 // app.use(tagsEndPoint);
 
-notification.initNotification(app, server);
+const initPromises = [
+    initNotification(app, server),
+];
 
-log.info('Preparing to listen on %s:%d', config.get('httpsHost'), config.get('httpsPort'));
-server.listen(config.get('httpsPort'), config.get('httpsHost'));
-log.info('Listening on %s:%d', config.get('httpsHost'), config.get('httpsPort'));
+Promise
+    .all(initPromises)
+    .then(() => {
+        log.info('Preparing to listen on %s:%d', config.get('httpsHost'), config.get('httpsPort'));
+        server.listen(config.get('httpsPort'), config.get('httpsHost'));
+        log.info('Listening on %s:%d', config.get('httpsHost'), config.get('httpsPort'));
+    });
