@@ -1,5 +1,5 @@
 import storage from '../../lib/localStorage';
-import { logger as log, errorHandler } from '../../lib/tools';
+import { log, errorHandler } from '../../lib/tools';
 import { inodeIndexer, inodeHandler,
          cleanUpInode, checkInodeModification } from '../../managers/inode';
 

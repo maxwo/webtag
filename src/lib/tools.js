@@ -1,81 +1,57 @@
-"use strict";
+import winston from 'winston';
 
-const fs = require('fs');
-const winston = require('winston');
-
-exports.logger = new winston.Logger({
+export const log = new winston.Logger({
     transports: [
-        new winston.transports.Console()
-    ]
+        new winston.transports.Console(),
+    ],
 });
 
-exports.drain = function(readStream) {
-    readStream.pipe(fs.createWriteStream('/dev/null'));
-};
-
-exports.readParam = function(stream, callback) {
-    let value = '';
-    stream.on('end', function() {
-        callback(value);
-    });
-    stream.on('data', function(chunk) {
-        value += chunk;
-    });
-};
 
 /**
  * Error object for generic errors
  */
-exports.Error = function(context) {
-		context = context ? context : "An error occured.";
+export function Error(context = 'An error occured.') {
     context = typeof context === 'string' ? {
-        message: context
+        message: context,
     } : context;
 
     this.context = context;
-};
-exports.Error.prototype = new Error();
+}
 
 /**
  * Error object for inode errors
  */
-exports.DocumentError = function(inode, context) {
-    context = context ? context : {};
+export function DocumentError(inode, context = {}) {
     context.type = 'inode';
     context.inode = inode;
     context.id = inode.id;
 
     exports.Error.apply(this, [context]);
-};
-exports.DocumentError.prototype = new exports.Error();
+}
+DocumentError.prototype = new Error();
 
 /**
  * Error object for user errors
  */
-exports.UserError = function(user, context) {
-    context = context ? context : {};
+export function UserError(user, context = {}) {
     context.type = 'user';
     context.user = user;
     context.login = typeof user === 'string' ? user : user.login;
 
     exports.Error.apply(this, [context]);
-};
-exports.UserError.prototype = new exports.Error();
+}
+UserError.prototype = new Error();
 
-exports.DataError = function(stream, context) {
-    context = context ? context : {};
+export function DataError(stream, context = {}) {
     context.type = 'data';
     context.stream = stream;
 
     exports.Error.apply(this, [context]);
+}
 
-};
-
-exports.errorHandler = function(response) {
-    return function(error) {
-        console.log('error while processing a request:' + error);
-        console.log(error);
-        console.log(error.stack);
+export function errorHandler(response) {
+    return (error) => {
+        log.error('Error while processing a request: %s', error);
 
         let status = 500;
 
@@ -87,7 +63,5 @@ exports.errorHandler = function(response) {
 
         response.send(status, JSON.stringify(error, null, 4));
         response.end();
-
     };
-
-};
+}

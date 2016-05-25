@@ -1,5 +1,5 @@
 import ocr from '../lib/ocr';
-import { logger as log } from '../lib/tools';
+import { log } from '../lib/tools';
 import { inodeIndexer } from '../managers/inode';
 import { initNotification, getChannel, inodeIndexed } from '../managers/notification';
 import { listenQueue } from '../lib/amqp';
@@ -49,7 +49,7 @@ function indexInode(message) {
             }
 
             return result;
-        })
+        });
 }
 
 log.info('Preparing an indexation worker...');

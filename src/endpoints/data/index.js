@@ -1,6 +1,6 @@
 import parse from '../../lib/form';
 import storage from '../../lib/localStorage';
-import { logger as log, errorHandler } from '../../lib/tools';
+import { log, errorHandler } from '../../lib/tools';
 import mime from 'mime-types';
 import { inodeIndexer, inodeHandler, cleanUpInode } from '../../managers/inode';
 import { inodeSaved } from '../../managers/notification';
@@ -50,7 +50,7 @@ function postData(request, response) {
 }
 
 function getData(request, response) {
-    const s = new storage.retrieval(request.inode.file.id);
+    const s = new storage.Retrieval(request.inode.file.id);
     s.on('error', errorHandler(response));
     s.pipe(response);
 }

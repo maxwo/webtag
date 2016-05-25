@@ -1,7 +1,7 @@
-const nconf = require('nconf');
+import nconf from 'nconf';
 
-nconf
-		.argv()
+export const config = nconf
+	.argv()
     .env()
     .file({
         file: '/etc/webtag/config.json',
@@ -9,5 +9,3 @@ nconf
     .file({
         file: 'etc/defaults.json',
     });
-
-module.exports = nconf;

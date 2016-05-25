@@ -6,12 +6,11 @@ import fs from 'fs';
 import https from 'https';
 
 import { initNotification } from './managers/notification';
-import { logger as log, errorHandler } from './lib/tools';
+import { log, errorHandler } from './lib/tools';
 import config from './lib/config';
 
 import initDataEndPoints from './endpoints/data';
 import initInodeEndPoints from './endpoints/inode';
-//import tagsEndPoint from './endpoints/tags';
 
 const options = {
     key: fs.readFileSync(config.get('httpsKey')),

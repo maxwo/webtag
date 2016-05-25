@@ -1,4 +1,4 @@
-import { logger as log } from '../lib/tools';
+import { log } from '../lib/tools';
 import config from '../lib/config';
 import { createChannel, createQueue, createTopic } from '../lib/amqp';
 
@@ -14,12 +14,7 @@ function notifyUsers(inode, buffer) {
     }
 }
 
-export function receivingFile(user, id, fileName) {
-    const buffer = new Buffer(JSON.stringify({
-        id,
-        fileName,
-    }));
-}
+export function receivingFile() {}
 
 export function inodeSaved(inode) {
     log.info('Preparing inode saved message...');

@@ -2,11 +2,20 @@
  * Created by max on 10/02/15.
  */
 
-import tools from '../lib/tools';
+import { log } from '../lib/tools';
 import multiparty from 'multiparty';
 import storage from '../lib/localStorage';
 import { receivingFile } from '../managers/notification';
-// notification = require('../lib/notification');
+
+function readParam(stream, callback) {
+    let value = '';
+    stream.on('end', () => {
+        callback(value);
+    });
+    stream.on('data', (chunk) => {
+        value += chunk;
+    });
+}
 
 export default function parse(request) {
     let fileCount = 0;
@@ -34,21 +43,21 @@ export default function parse(request) {
 
         form.on('part', (part) => {
             if (error) {
-                tools.drain(part);
+                part.resume();
                 return;
             }
 
             // A parameter has been sent
             if (!part.filename) {
-                tools.readParam(part, (value) => {
+                readParam(part, (value) => {
                     result.parameters[part.name] = value;
                 });
                 endPromiseIfNeeded();
             } else {
                 ((p) => {
-                    tools.logger.info('Receiving file...');
+                    log.info('Receiving file...');
 
-                    let store = new storage.storage();
+                    const store = new storage.Storage();
 
                     const file = {
                         id: store.id(),

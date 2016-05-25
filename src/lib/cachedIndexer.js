@@ -2,67 +2,65 @@
  * Created by max on 15/02/15.
  */
 
-let redis = require('redis');
-let tools = require('../lib/tools');
-let config = require('../lib/config');
+import redis from 'redis';
+import { log } from '../lib/tools';
+import config from '../lib/config';
+import Indexer from './indexer';
 
-tools.logger.info('Connecting to redis on %s:%s', config.get('redisHost'), config.get('redisPort'));
-let client = redis.createClient(config.get('redisPort'), config.get('redisHost'));
+log.info('Connecting to redis on %s:%s', config.get('redisHost'), config.get('redisPort'));
+const client = redis.createClient(config.get('redisPort'), config.get('redisHost'));
 
-exports.cachedIndexer = function(indexer) {
-    let cacheKey = function(id) {
-        return 'cache.' + indexer.type + '.' + id;
-    };
+export default class CachedIndexer extends Indexer {
 
-    return {
-        type: indexer.type,
+    constructor(type, template, ttl = 60) {
+        super(type, template);
+        this.ttl = ttl;
+    }
 
-        index: function(document) {
-            client.set(cacheKey(id), JSON.stringify(document));
-            return indexer.index(document);
+    cacheKey(id) {
+        return `cache.${this.type}.${id}`;
+    }
 
-        },
-
-        get: function(id) {
-            tools.logger.info('Check for cache %s %s.', indexer.type, id);
-
-            return new Promise(function(resolve, reject) {
-                const cacheId = cacheKey(id);
-                client.get(cacheId, function(err, reply) {
-                    if (err || reply === null) {
-                        tools.logger.info('Not found or error. Get sent for %s %s.', indexer.type, id);
-                        indexer
-                            .get(id)
-                            .then(function(document) {
-                                resolve(document);
-
-                                client.set(cacheId, JSON.stringify(document));
-                                client.expire(cacheId, 3);
-
-                            })
-                            .catch(reject);
-
-                    } else {
-                        tools.logger.info('Document %s %s found in cache.', indexer.type, id);
-                        resolve(JSON.parse(reply));
-
-                    }
-
-                });
-
+    index(document) {
+        return super
+            .index(document)
+            .then((doc) => {
+                const cacheId = this.cacheKey(doc.id);
+                log.info(`Setting ${cacheId} into cache.`);
+                client.set(cacheId, JSON.stringify(doc));
+                client.expire(cacheId, this.ttl);
+                return doc;
             });
+    }
 
-            return indexer.get(id);
-        },
+    get(id) {
+        log.info('Check for cache %s %s.', this.type, id);
 
-        search: indexer.search,
+        return new Promise((resolve, reject) => {
+            const cacheId = this.cacheKey(id);
+            client.get(cacheId, (err, reply) => {
+                if (err || reply === null) {
+                    log.info('Not found or error. Get sent for %s %s.', this.type, id);
+                    super
+                        .get(id)
+                        .then((document) => {
+                            resolve(document);
 
-        delete: function(id) {
-            client.set(cacheKey(id), null);
-            return indexer.delete(id);
+                            client.set(cacheId, JSON.stringify(document));
+                            client.expire(cacheId, this.ttl);
+                        })
+                        .catch(reject);
+                } else {
+                    log.info('Document %s %s found in cache.', this.type, id);
+                    resolve(JSON.parse(reply));
+                }
+            });
+        });
+    }
 
-        }
+    delete(id) {
+        client.set(this.cacheKey(id), null);
+        return super.delete(id);
+    }
 
-    };
-
-};
+}

@@ -1,4 +1,4 @@
-import { logger as log } from './tools';
+import { log } from './tools';
 import amqplib from 'amqplib';
 import config from './config';
 
@@ -61,10 +61,12 @@ export function listenFanOut(channel, fanOutName, onMessage) {
         .then(() => channel.assertQueue('', {
             exclusive: true,
         }))
+        /* eslint-disable arrow-body-style */
         .then((qok) => {
             return channel.bindQueue(qok.queue, fanOutName, '')
                 .then(() => qok.queue);
         })
+        /* eslint-enable arrow-body-style */
         .then((queue) => {
             log.info(`Listening to fanout ${fanOutName}...`);
             return channel.consume(queue, onMessage, {

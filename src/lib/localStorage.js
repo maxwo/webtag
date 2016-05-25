@@ -1,10 +1,9 @@
-let fs = require('fs');
-let crypto = require('crypto');
-let util = require('util');
+import fs from 'fs';
+import util from 'util';
 import uuid from 'node-uuid';
 
-let tools = require('./tools');
-let config = require('./config');
+import { log } from './tools';
+import config from './config';
 
 let storagePath = config.get('localStoragePath');
 
@@ -21,26 +20,26 @@ let getFilePath = function(id) {
 
 
 
-util.inherits(retrieval, fs.ReadStream);
+util.inherits(Retrieval, fs.ReadStream);
 
 /**
  * Object used to retrieve a file.
  */
-function retrieval(id) {
+function Retrieval(id) {
     this._id = id;
     this._fullPath = getFilePath(this._id);
 
     fs.ReadStream.apply(this, [this._fullPath]);
 }
 
-exports.retrieval = retrieval;
+exports.Retrieval = Retrieval;
 
 
 
 
-util.inherits(storage, fs.WriteStream);
+util.inherits(Storage, fs.WriteStream);
 
-function storage(id) {
+function Storage(id) {
 
     if (typeof id === 'undefined') {
         id = uuid.v4();
@@ -49,42 +48,42 @@ function storage(id) {
     this._id = id;
     this._fullPath = getFilePath(this._id);
 
-    tools.logger.info('Destination file: ' + this._fullPath);
+    log.info('Destination file: ' + this._fullPath);
 
     fs.WriteStream.apply(this, [this._fullPath]);
 
 }
 
-storage.prototype.id = function() {
+Storage.prototype.id = function() {
     return this._id;
 };
 
-storage.prototype.size = function() {
+Storage.prototype.size = function() {
     return this.bytesWritten;
 };
 
-storage.prototype.location = function() {
+Storage.prototype.location = function() {
     return 'file://' + this._fullPath;
 };
 
-storage.prototype.process = function(reader) {
+Storage.prototype.process = function(reader) {
 
     let that = this;
 
     //fs.exists(storagePath, function(exists) {
 
     /*if ( !exists ) {
-			tools.logger.error('%s does not exist.', storagePath);
+			tools.log.error('%s does not exist.', storagePath);
             that.emit('error', new tools.DataError(storagePath));
             return;
         }*/
 
     that.on('error', that.clean);
     that.on('finish', function() {
-        tools.logger.info('file %s done.', that._fullPath);
+        log.info('file %s done.', that._fullPath);
     });
 
-    tools.logger.info('writing file %s.', that._fullPath);
+    log.info('writing file %s.', that._fullPath);
 
     reader.on('end', function() {
         that.end();
@@ -95,7 +94,7 @@ storage.prototype.process = function(reader) {
 
 };
 
-storage.prototype.clean = function() {
+Storage.prototype.clean = function() {
     try {
         this.end();
     } catch (e) {}
@@ -104,20 +103,16 @@ storage.prototype.clean = function() {
     } catch (e) {}
 };
 
-storage.prototype.isDone = function() {
+Storage.prototype.isDone = function() {
     return this._done;
 };
 
-storage.prototype.hasError = function() {
+Storage.prototype.hasError = function() {
     return this._error;
 };
 
-exports.storage = storage;
-
-
+exports.Storage = Storage;
 
 exports.delete = function(id) {
-
     fs.unlink(getFilePath(id), function() {});
-
 };

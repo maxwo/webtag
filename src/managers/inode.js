@@ -1,4 +1,4 @@
-import Indexer from '../lib/indexer';
+import CachedIndexer from '../lib/cachedIndexer';
 import equal from 'deep-equal';
 import { errorHandler } from '../lib/tools';
 
@@ -33,7 +33,7 @@ const inodeTemplate = {
 };
 
 
-export const inodeIndexer = new Indexer('inode', inodeTemplate);
+export const inodeIndexer = new CachedIndexer('inode', inodeTemplate);
 
 export function inodeHandler(request, response, next) {
     inodeIndexer
@@ -59,7 +59,7 @@ export function checkInodeModification(inodeSent, currentInode) {
             return false;
         }
     }
-    
+
     // Check for read-only fields
     for (const f of readOnlyTemplate) {
         if (!equal(inodeSent[f], currentInode[f])) {

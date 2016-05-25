@@ -5,7 +5,7 @@
 import ElasticSearchClient from 'elasticsearchclient';
 import uuid from 'node-uuid';
 
-import { logger as log, DocumentError, Error } from '../lib/tools';
+import { log, DocumentError, Error } from '../lib/tools';
 import config from '../lib/config';
 
 const serverOptions = {
@@ -91,7 +91,9 @@ export default class Indexer {
                 const result = JSON.parse(data);
                 if (result.found) {
                     log.info('Document %s %s found.', this.type, id);
+                    /* eslint-disable no-underscore-dangle */
                     resolve(result._source);
+                    /* eslint-enable no-underscore-dangle */
                 } else {
                     log.info('Document %s %s not found.', this.type, id);
                     reject(new DocumentError({
@@ -137,7 +139,9 @@ export default class Indexer {
 
                 if (result.hits.total > 0) {
                     for (let i = 0; i < result.hits.hits.length; i++) {
+                        /* eslint-disable no-underscore-dangle */
                         documents.push(result.hits.hits[i]._source);
+                        /* eslint-enable no-underscore-dangle */
                     }
                 }
 
