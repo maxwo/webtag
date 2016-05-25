@@ -116,7 +116,7 @@ export default class Indexer {
         });
     }
 
-    search(query, from, limit, facets) {
+    search(query, from, limit, aggregations) {
         return new Promise((resolve, reject) => {
             log.info('Initializing search of %s.', this.type);
 
@@ -126,8 +126,8 @@ export default class Indexer {
                 query,
             };
 
-            if (facets) {
-                sendQuery.facets = facets;
+            if (aggregations) {
+                sendQuery.aggregations = aggregations;
             }
 
             const cs = client.search(index, this.type, sendQuery);
@@ -145,13 +145,20 @@ export default class Indexer {
                     }
                 }
 
-                if (result.facets.tags.terms.length > 0) {
-                    for (let j = 0; j < result.facets.tags.terms.length; j++) {
+                /* eslint-disable brace-style */
+                if (result.aggregations
+                    && result.aggregations.group_by_state
+                    && result.aggregations.group_by_state.buckets
+                    && result.aggregations.group_by_state.buckets.length > 0)
+                /* eslint-enable brace-style */
+                {
+                    const buckets = result.aggregations.group_by_state.buckets;
+                    buckets.forEach((b) => {
                         tags.push({
-                            tag: result.facets.tags.terms[j].term,
-                            count: result.facets.tags.terms[j].count,
+                            tag: b.key,
+                            count: b.doc_count,
                         });
-                    }
+                    });
                 }
 
                 resolve({

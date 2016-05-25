@@ -1,6 +1,6 @@
 import nconf from 'nconf';
 
-export const config = nconf
+const config = nconf
 	.argv()
     .env()
     .file({
@@ -9,3 +9,5 @@ export const config = nconf
     .file({
         file: 'etc/defaults.json',
     });
+
+export default config;

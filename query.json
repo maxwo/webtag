@@ -1,0 +1,21 @@
+{
+    "from": 0,
+    "size": 100,
+    "query": {
+        "bool": {
+            "must": [{
+                "term": {
+                    "tags": "file"
+                }
+            }]
+        }
+    },
+    "aggregations": {
+        "group_by_state": {
+            "terms": {
+                "field": "tags",
+                "size": 20
+            }
+        }
+    }
+}
