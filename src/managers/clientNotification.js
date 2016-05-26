@@ -8,7 +8,9 @@ let amqpChannel;
 let io;
 
 function initClient(socket) {
-    listenTopic(amqpChannel, 'events', ['user.max'], (message) => {
+    const userName = socket.request.socket.getPeerCertificate().subject.CN;
+
+    listenTopic(amqpChannel, 'events', [`user.${userName}`], (message) => {
         if (message !== null) {
             const id = message.content.toString();
             inodeIndexer
