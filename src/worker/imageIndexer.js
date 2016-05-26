@@ -1,9 +1,10 @@
 import ocr from '../lib/ocr';
+import exif from '../lib/exif';
 import { log } from '../lib/tools';
-import { inodeIndexer } from '../managers/inode';
+import moment from 'moment';
+import { inodeIndexer, setAggregatedDate } from '../managers/inode';
 import { initNotification, getChannel, inodeIndexed } from '../managers/notification';
 import { listenQueue } from '../lib/amqp';
-import { ExifImage } from 'exif';
 
 const imageContentTypes = [
     'image/bmp',
@@ -14,24 +15,6 @@ const imageContentTypes = [
 ];
 
 let channel;
-
-function readExif(fileName) {
-    return new Promise((resolve, reject) => {
-        try {
-            log.info(`Reading EXIF of file ${fileName} done.`);
-            new ExifImage({ image : fileName }, (error, exifData) => {
-                if (error) {
-                    reject(error);
-                } else {
-                    log.info(`EXIF of file ${fileName} read.`);
-                    resolve(exifData);
-                }
-            });
-        } catch (error) {
-            reject(error.message);
-        }
-    });
-}
 
 function indexInode(message) {
     channel.ack(message);
@@ -47,27 +30,41 @@ function indexInode(message) {
             // Check if this is an image
             if (imageContentTypes.indexOf(inode.contentType) !== -1) {
                 const fileName = inode.file.location.substr(7);
+                let indexedInode = inode;
                 // If so, OCR it
-                log.info(`OCR of inode:file ${id}:${fileName}`);
+                log.info(`Indexation of inode:file ${id}:${fileName}`);
 
-                result = ocr(fileName)
-                    .then((text) => {
-                        log.info(`OCR of inode ${id} done.`);
-                        inode.textContent = text;
-                    })
-                    .then(() => readExif(fileName))
-                    .then((exif) => {
-                        log.info(JSON.stringify(exif, null, 4));
-                        if (exif && exif.exif && exif.exif.CreateDate) {
-                            inode.documentDate = exif.exif.CreateDate;
+                const indexPromises = [
+                    ocr(fileName),
+                    exif(fileName),
+                ];
+
+                result = Promise
+                    .all(indexPromises)
+                    .then((results) => {
+                        const [text, exifData] = results;
+
+                        // Indexation of text
+                        if (text) {
+                            indexedInode.textContent = text;
                         }
+
+                        // Indexation of EXIF contents
+                        if (exifData && exifData.exif && exifData.exif.CreateDate) {
+                            const documentDate =
+                                moment(exifData.exif.CreateDate, 'YYYY/MM/DD HH:mm:ss')
+                                    .toDate();
+
+                            indexedInode = setAggregatedDate(indexedInode,
+                                'document', documentDate);
+                        }
+
+                        indexedInode.states.indexed = true;
+
+                        return inodeIndexer.index(indexedInode);
                     })
                     .then(() => {
-                        inode.states.indexed = true;
-                        return inodeIndexer.index(inode);
-                    })
-                    .then(() => {
-                        inodeIndexed(inode);
+                        inodeIndexed(indexedInode);
                     })
                     .catch((err) => {
                         log.error(`Error while OCR of ${id}: ${err}`);

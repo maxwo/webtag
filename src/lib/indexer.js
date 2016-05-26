@@ -4,7 +4,6 @@
 
 import ElasticSearchClient from 'elasticsearchclient';
 import uuid from 'node-uuid';
-
 import { log, DocumentError, Error } from '../lib/tools';
 import config from '../lib/config';
 
