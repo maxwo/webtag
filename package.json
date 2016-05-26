@@ -8,7 +8,11 @@
     "http-server": "server.js"
   },
   "scripts": {
-    "start": "babel-node index.js --presets es2015,stage-2",
+    "start": "nodemon index.js --exec babel-node",
+    "startIndexationWorker": "nodemon src/worker/imageIndexer.js --exec babel-node",
+    "build": "babel index.js src -d dist",
+    "serve": "node dist/index.js",
+    "serveIndexationWorker": "node dist/worker/imageIndexer.js",
     "install": "brew install elasticsearch redis rabbitmq tesseract --with-all-languages",
     "adduser": "node ./adduser.js"
   },
@@ -30,7 +34,8 @@
     "eslint": "^2.10.2",
     "eslint-config-airbnb": "^9.0.1",
     "gulp": "^3.9.1",
-    "gulp-eslint": "^2.0.0"
+    "gulp-eslint": "^2.0.0",
+    "nodemon": "^1.9.2"
   },
   "dependencies": {
     "amqp": "^0.2.4",
