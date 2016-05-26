@@ -1,7 +1,6 @@
 import express from 'express';
 import bodyParser from 'body-parser';
 import logger from 'express-logger';
-import path from 'path';
 import fs from 'fs';
 import https from 'https';
 
@@ -41,7 +40,6 @@ app.use((request, response, next) => {
     next();
 });
 
-console.log(path.join('./static'))
 app.use(express.static('static'));
 
 app.use('/api/user/', bodyParser.json());

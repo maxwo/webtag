@@ -27,14 +27,11 @@ export function listenTopic(channel, topicName, routingKey, onMessage) {
             const bindQueuePromises = routingKey
                 .map((rk) => channel.bindQueue(qok.queue, topicName, rk));
 
-            console.log(qok);
-
             return Promise
                 .all(bindQueuePromises)
                 .then(() => qok.queue);
         })
         .then((queue) => {
-            console.log(queue);
             log.info(`Listening to topic ${topicName}...`);
             channel.consume(queue, onMessage, {
                 noAck: false,

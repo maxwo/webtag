@@ -28,7 +28,7 @@ function getInodes(request, response) {
     if (typeof request.query.text === 'string') {
         words = request.query.text
             .split(',')
-            .filter((t) => t.length > 0)
+            .filter((t) => t.length > 0);
     }
 
     const query = buildQuery(tags, words);

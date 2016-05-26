@@ -5,9 +5,6 @@ export default function buildQuery(tags, words) {
     const bool = {};
     const must = [];
 
-        log.info(tags);
-            log.info(words);
-
     if (typeof tags === 'object') {
         for (const tag of tags) {
             const term = {
