@@ -27,8 +27,8 @@ export default class CachedIndexer extends Indexer {
             .then((doc) => {
                 const cacheId = this.cacheKey(doc.id);
                 log.info(`Setting ${cacheId} into cache.`);
-                client.set(cacheId, JSON.stringify(doc), redis.print);
-                client.expire(cacheId, this.ttl, redis.print);
+                client.set(cacheId, JSON.stringify(doc));
+                client.expire(cacheId, this.ttl);
                 return doc;
             });
     }
@@ -46,8 +46,8 @@ export default class CachedIndexer extends Indexer {
                         .then((document) => {
                             resolve(document);
 
-                            client.set(cacheId, JSON.stringify(document), redis.print);
-                            client.expire(cacheId, this.ttl, redis.print);
+                            client.set(cacheId, JSON.stringify(document));
+                            client.expire(cacheId, this.ttl);
                         })
                         .catch(reject);
                 } else {

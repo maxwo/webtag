@@ -6,6 +6,7 @@ import fs from 'fs';
 import https from 'https';
 
 import { initNotification } from './managers/notification';
+import { initClientNotification } from './managers/clientNotification';
 import { log, errorHandler } from './lib/tools';
 import config from './lib/config';
 
@@ -40,7 +41,8 @@ app.use((request, response, next) => {
     next();
 });
 
-app.get('/*', express.static(path.join(__dirname, 'static')));
+console.log(path.join('./static'))
+app.use(express.static('static'));
 
 app.use('/api/user/', bodyParser.json());
 app.use('/api/inode/', bodyParser.json());
@@ -60,6 +62,7 @@ initInodeEndPoints(app);
 
 const initPromises = [
     initNotification(),
+    initClientNotification(server),
 ];
 
 Promise

@@ -27,15 +27,19 @@ export function listenTopic(channel, topicName, routingKey, onMessage) {
             const bindQueuePromises = routingKey
                 .map((rk) => channel.bindQueue(qok.queue, topicName, rk));
 
+            console.log(qok);
+
             return Promise
                 .all(bindQueuePromises)
                 .then(() => qok.queue);
         })
         .then((queue) => {
+            console.log(queue);
             log.info(`Listening to topic ${topicName}...`);
-            return channel.consume(queue, onMessage, {
-                noAck: true,
+            channel.consume(queue, onMessage, {
+                noAck: false,
             });
+            return queue;
         })
         .catch(log.error);
 }
@@ -69,9 +73,10 @@ export function listenFanOut(channel, fanOutName, onMessage) {
         /* eslint-enable arrow-body-style */
         .then((queue) => {
             log.info(`Listening to fanout ${fanOutName}...`);
-            return channel.consume(queue, onMessage, {
-                noAck: true,
+            channel.consume(queue, onMessage, {
+                noAck: false,
             });
+            return queue;
         })
         .catch(log.error);
 }
