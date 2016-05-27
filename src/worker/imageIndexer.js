@@ -5,14 +5,7 @@ import moment from 'moment';
 import { inodeIndexer, setAggregatedDate } from '../managers/inode';
 import { initNotification, getChannel, inodeIndexed } from '../managers/notification';
 import { listenQueue } from '../lib/amqp';
-
-const imageContentTypes = [
-    'image/bmp',
-    'image/gif',
-    'image/jpeg',
-    'image/png',
-    'image/tiff',
-];
+import { imageContentTypes } from '../lib/imageContentTypes';
 
 let channel;
 
