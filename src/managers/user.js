@@ -5,6 +5,9 @@ export function userFromRequest(request) {
     if (typeof pc.subject.OU === 'string') {
         pc.subject.OU = [pc.subject.OU];
     }
+    if (typeof pc.subject.OU === 'undefined') {
+        pc.subject.OU = [];
+    }
 
     return {
         userName: pc.subject.UID,
