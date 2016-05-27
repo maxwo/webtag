@@ -46,6 +46,7 @@
     "exif": "^0.6.0",
     "express": "^4.13.4",
     "express-logger": "0.0.3",
+    "method-override": "^2.3.6",
     "mime-types": "^2.1.11",
     "moment": "^2.13.0",
     "multiparty": "^4.1.2",

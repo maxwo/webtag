@@ -1,3 +1,5 @@
+import { log } from '../lib/tools';
+
 export function userFromRequest(request) {
     const pc = request.socket.getPeerCertificate();
     if (typeof pc.subject.OU === 'string') {
@@ -14,4 +16,11 @@ export function userFromRequest(request) {
         state: pc.subject.ST,
         country: pc.subject.C,
     };
+}
+
+export function userMiddleware(request, response, next) {
+    const user = userFromRequest(request);
+    log.info(`User ${user.userName} connected.`);
+    request.user = user;
+    next();
 }
