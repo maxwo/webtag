@@ -27,7 +27,7 @@ function postData(request, response) {
                     filename: file.filename,
                     contentType: mime.lookup(file.filename),
                     tags,
-                    owner: request.user.login,
+                    owner: request.user.userName,
                     groups: request.user.groups,
                     file,
                 }));

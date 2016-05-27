@@ -10,8 +10,13 @@ x509_extensions        = v3_ca
 C                      = FR
 ST                     = NPDC
 L                      = Lille
-CN                     = mel
-emailAddress           = certs@example.com
+UID                    = mel
+0.OU                   = user
+1.OU                   = photograph
+CN                     = Melanie Dubois
+emailAddress           = mel@example.com
+surname                = Dubois
+givenName              = Melanie
 
 [ req_attributes ]
 challengePassword      = password

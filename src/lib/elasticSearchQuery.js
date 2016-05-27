@@ -1,5 +1,3 @@
-import { log } from './tools';
-
 export default function buildQuery(tags, words) {
     const query = {};
     const bool = {};

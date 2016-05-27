@@ -10,8 +10,14 @@ x509_extensions        = v3_ca
 C                      = FR
 ST                     = NPDC
 L                      = Lille
-CN                     = max
-emailAddress           = certs@example.com
+0.OU                   = dev
+1.OU                   = user
+2.OU                   = photograph
+UID                    = max
+CN                     = Maxime Wojtczak
+emailAddress           = max@example.com
+surname                = Wojtczak
+givenName              = Maxime
 
 [ req_attributes ]
 challengePassword      = password

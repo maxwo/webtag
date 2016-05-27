@@ -36,7 +36,7 @@ DocumentError.prototype = new Error();
 export function UserError(user, context = {}) {
     context.type = 'user';
     context.user = user;
-    context.login = typeof user === 'string' ? user : user.login;
+    context.userName = typeof user === 'string' ? user : user.userName;
 
     exports.Error.apply(this, [context]);
 }

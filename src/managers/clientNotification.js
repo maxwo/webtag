@@ -2,15 +2,25 @@ import { log } from '../lib/tools';
 import config from '../lib/config';
 import { createChannel, listenTopic } from '../lib/amqp';
 import { inodeIndexer, cleanUpInode } from './inode';
+import { userFromRequest } from './user';
 import ioInitializer from 'socket.io';
 
 let amqpChannel;
 let io;
 
-function initClient(socket) {
-    const userName = socket.request.socket.getPeerCertificate().subject.CN;
+function routingKeysForUser(user) {
+    const routingKeys = [];
+    routingKeys.push(`user.${user.userName}`);
+    user.groups.forEach((g) => {
+        routingKeys.push(`group.${g}`);
+    });
+    return routingKeys;
+}
 
-    listenTopic(amqpChannel, 'events', [`user.${userName}`], (message) => {
+function initClient(socket) {
+    const user = userFromRequest(socket.request);
+
+    listenTopic(amqpChannel, 'events', routingKeysForUser(user), (message) => {
         if (message !== null) {
             const id = message.content.toString();
             inodeIndexer

@@ -7,6 +7,7 @@ import https from 'https';
 import { initNotification } from './managers/notification';
 import { initClientNotification } from './managers/clientNotification';
 import { log, errorHandler } from './lib/tools';
+import { userFromRequest } from './managers/user';
 import config from './lib/config';
 
 import initDataEndPoints from './endpoints/data';
@@ -31,12 +32,9 @@ app.use(logger({
 
 // app.use(express.basicAuth( userManager.authenticate ));
 app.use((request, response, next) => {
-    const userName = request.socket.getPeerCertificate().subject.CN;
-    log.info(`Utilisateur ${userName} connecte.`);
-    request.user = {
-        login: userName,
-        groups: [],
-    };
+    const user = userFromRequest(request);
+    log.info(`User ${user.userName} connected.`);
+    request.user = user;
     next();
 });
 
