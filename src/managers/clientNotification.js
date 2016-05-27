@@ -20,16 +20,15 @@ function routingKeysForUser(user) {
 function initClient(socket) {
     const user = userFromRequest(socket.request);
 
+    // Saved IDs are notified every 200ms, then store them somewhere...
+    let savedIDs = [];
+
     listenTopic(amqpChannel, 'events', routingKeysForUser(user), (message) => {
         if (message !== null) {
             const id = message.content.toString();
-            inodeIndexer
-                .get(id)
-                .then((inode) => {
-                    const i = cleanUpInode(inode);
-                    socket.emit('inodeChanged', i);
-                })
-                .catch(log.error);
+            if (savedIDs.indexOf(id) === -1) {
+                savedIDs.push(id);
+            }
         } else {
             log.info('Queue deleted.');
         }
@@ -41,6 +40,22 @@ function initClient(socket) {
         });
     })
     .catch(log.error);
+
+    setInterval(() => {
+        const idToNotify = savedIDs;
+        savedIDs = [];
+
+        idToNotify.forEach((id) => {
+            log.info(`Notifying connected user ${user.userName} about ${id}.`)
+            inodeIndexer
+                .get(id)
+                .then((inode) => {
+                    const i = cleanUpInode(inode);
+                    socket.emit('inodeSaved', i);
+                })
+                .catch(log.error);
+        });
+    }, 200);
 }
 
 export function initClientNotification(server) {
