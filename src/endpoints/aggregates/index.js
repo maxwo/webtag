@@ -13,7 +13,8 @@ function getAggregates(request, response) {
         .then((results) => {
             response
                 .status(200)
-                .send(JSON.stringify(results.aggs, null, 4));
+                .type('json')
+                .end(JSON.stringify(results.aggs, null, 4));
         })
         .catch(errorHandler(response));
 }

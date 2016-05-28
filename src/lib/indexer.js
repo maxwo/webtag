@@ -31,11 +31,12 @@ export default class Indexer {
         document = Object.assign({}, this.template, document);
 
         // Dirty. Put this in inode.
-        document.uploadDate = document.file.uploadDate;
+        // document.uploadDate = document.file.uploadDate;
         document = setAggregatedDate(document, 'creation', new Date());
         document.states.received = true;
 
         document.file.uploadDate = undefined;
+        // End of dirty stuffs.
 
         return new Promise((resolve, reject) => {
             const ci = client.index(index, this.type, document, document.id);
@@ -147,33 +148,17 @@ export default class Indexer {
                     }
                 }
 
-                for (const agg in result.aggregations) {
-                    const buckets = result.aggregations[agg].buckets;
-                    console.log(agg);
-                    console.log(buckets);
-                    aggs[agg] = [];
-                    buckets.forEach((b) => {
-                        aggs[agg].push({
-                            key: b.key,
-                            count: b.doc_count,
+                if (result.aggregations) {
+                    result.aggregations.forEach((agg) => {
+                        const buckets = result.aggregations[agg].buckets;
+                        aggs[agg] = [];
+                        buckets.forEach((b) => {
+                            aggs[agg].push({
+                                key: b.key,
+                                count: b.doc_count,
+                            });
                         });
                     });
-                }
-
-                /* eslint-disable brace-style */
-                if (result.aggregations
-                    && result.aggregations.group_by_tags
-                    && result.aggregations.group_by_tags.buckets
-                    && result.aggregations.group_by_tags.buckets.length > 0)
-                /* eslint-enable brace-style */
-                {
-                    /*const buckets = result.aggregations.group_by_tags.buckets;
-                    buckets.forEach((b) => {
-                        tags.push({
-                            tag: b.key,
-                            count: b.doc_count,
-                        });
-                    });*/
                 }
 
                 resolve({

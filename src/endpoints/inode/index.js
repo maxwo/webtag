@@ -14,13 +14,16 @@ function getInodes(request, response) {
         .then((results) => {
             response
                 .status(200)
-                .send(JSON.stringify(results.documents, null, 4));
+                .type('json')
+                .end(JSON.stringify(results.documents, null, 4));
         })
         .catch(errorHandler(response));
 }
 
 function getInode(request, response) {
-    response.end(JSON.stringify(cleanUpInode(request.inode)));
+    response
+        .type('json')
+        .end(JSON.stringify(cleanUpInode(request.inode)));
 }
 
 function putInode(request, response) {

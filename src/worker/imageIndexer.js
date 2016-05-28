@@ -46,10 +46,9 @@ function indexInode(message) {
                             const documentDate =
                                 moment(exifData.exif.CreateDate, 'YYYY/MM/DD HH:mm:ss')
                                     .toDate();
-                            
+
                             indexedInode = setAggregatedDate(indexedInode,
                                 'document', documentDate);
-                            console.log(indexedInode);
                         }
 
                         indexedInode.states.indexed = true;

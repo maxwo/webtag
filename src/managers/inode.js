@@ -3,27 +3,22 @@ import equal from 'deep-equal';
 import moment from 'moment';
 import { errorHandler } from '../lib/tools';
 
-const readOnlyFields = {
-    id: null,
-    contentType: null,
-    owner: null,
-    groups: null,
-    uploadDate: null,
-    states: null,
-    documentMonth: null,
-    documentYear: null,
-    uploadMonth: null,
-    uploadYear: null,
-};
-
 const invisibleFields = [
     'documentDay',
     'documentMonth',
     'documentYear',
-    'uploadDay',
-    'uploadMonth',
-    'uploadYear',
+    'creationDay',
+    'creationMonth',
+    'creationYear',
     'textContent',
+];
+
+const readOnlyFields = [
+    'id',
+    'owner',
+    'groups',
+    'creationDate',
+    'states',
 ];
 
 const inodeTemplate = {
@@ -34,10 +29,18 @@ const inodeTemplate = {
     owner: null,
     groups: [],
     uploadDate: null,
+    creationDate: null,
+    creationDay: null,
+    creationMonth: null,
+    creationYear: null,
     indexedDate: null,
     archivedDate: null,
     deletionDate: null,
     documentDate: null,
+    documentDay: null,
+    documentMonth: null,
+    documentYear: null,
+    textContent: null,
     states: {
         received: false,
         indexed: false,
@@ -114,9 +117,9 @@ export function setAggregatedDate(inode, type, date) {
     const fullTime = m.format('HH:mm:ss.SSS');
 
     inode[`${type}Date`] = `${fullDate}T${fullTime}Z`;
-    inode[`${type}Day`] = '' + m.format('YYYYMMDD');
-    inode[`${type}Month`] = '' + m.format('YYYYMM');
-    inode[`${type}Year`] = '' + m.format('YYYY');
+    inode[`${type}Day`] = m.format('YYYYMMDD');
+    inode[`${type}Month`] = m.format('YYYYMM');
+    inode[`${type}Year`] = m.format('YYYY');
 
     return inode;
 }
