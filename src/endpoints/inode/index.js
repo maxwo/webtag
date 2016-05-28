@@ -1,44 +1,20 @@
 import storage from '../../lib/localStorage';
 import { log, errorHandler } from '../../lib/tools';
+import extractParameters from '../../lib/httpSearchQuery';
 import buildQuery from '../../lib/elasticSearchQuery';
-import { inodeIndexer, inodeHandler,
+import { inodeIndexer, inodeHandler, inodeAggregations,
          cleanUpInode, checkInodeModification } from '../../managers/inode';
 
-const aggregations = {
-    group_by_state: {
-        terms: {
-            field: 'tags',
-            size: 20,
-        },
-    },
-};
-
 function getInodes(request, response) {
-    let words;
-    let tags;
-
-    if (typeof request.query.tag === 'string') {
-        request.query.tag = [request.query.tag];
-    }
-
-    if (typeof request.query.tag === 'object') {
-        tags = request.query.tag;
-    }
-
-    if (typeof request.query.text === 'string') {
-        words = request.query.text
-            .split(',')
-            .filter((t) => t.length > 0);
-    }
-
+    const { words, tags } = extractParameters(request);
     const query = buildQuery(tags, words);
 
     inodeIndexer
-        .search(query, 0, 100, aggregations)
+        .search(query, 0, 100, inodeAggregations)
         .then((results) => {
             response
                 .status(200)
-                .send(JSON.stringify(results, null, 4));
+                .send(JSON.stringify(results.documents, null, 4));
         })
         .catch(errorHandler(response));
 }

@@ -58,6 +58,8 @@ function getData(request, response) {
         s.on('error', errorHandler(response));
         response.type(request.inode.contentType);
         s.pipe(response);
+    } else if (imageContentTypes.indexOf(request.inode.contentType) === -1) {
+        errorHandler(response)();
     } else {
         const [width, height] = request.query.thumb.split('x');
         const resize = imagemagick.streams.convert({

@@ -5,6 +5,7 @@
 import ElasticSearchClient from 'elasticsearchclient';
 import uuid from 'node-uuid';
 import { log, DocumentError, Error } from '../lib/tools';
+import { setAggregatedDate } from '../managers/inode';
 import config from '../lib/config';
 
 const serverOptions = {
@@ -28,8 +29,10 @@ export default class Indexer {
         }
 
         document = Object.assign({}, this.template, document);
+
+        // Dirty. Put this in inode.
         document.uploadDate = document.file.uploadDate;
-        document.indexedDate = new Date();
+        document = setAggregatedDate(document, 'creation', new Date());
         document.states.received = true;
 
         document.file.uploadDate = undefined;
@@ -134,7 +137,7 @@ export default class Indexer {
             cs.on('data', (data) => {
                 const result = JSON.parse(data);
                 const documents = [];
-                const tags = [];
+                const aggs = {};
 
                 if (result.hits.total > 0) {
                     for (let i = 0; i < result.hits.hits.length; i++) {
@@ -144,25 +147,38 @@ export default class Indexer {
                     }
                 }
 
-                /* eslint-disable brace-style */
-                if (result.aggregations
-                    && result.aggregations.group_by_state
-                    && result.aggregations.group_by_state.buckets
-                    && result.aggregations.group_by_state.buckets.length > 0)
-                /* eslint-enable brace-style */
-                {
-                    const buckets = result.aggregations.group_by_state.buckets;
+                for (const agg in result.aggregations) {
+                    const buckets = result.aggregations[agg].buckets;
+                    console.log(agg);
+                    console.log(buckets);
+                    aggs[agg] = [];
                     buckets.forEach((b) => {
-                        tags.push({
-                            tag: b.key,
+                        aggs[agg].push({
+                            key: b.key,
                             count: b.doc_count,
                         });
                     });
                 }
 
+                /* eslint-disable brace-style */
+                if (result.aggregations
+                    && result.aggregations.group_by_tags
+                    && result.aggregations.group_by_tags.buckets
+                    && result.aggregations.group_by_tags.buckets.length > 0)
+                /* eslint-enable brace-style */
+                {
+                    /*const buckets = result.aggregations.group_by_tags.buckets;
+                    buckets.forEach((b) => {
+                        tags.push({
+                            tag: b.key,
+                            count: b.doc_count,
+                        });
+                    });*/
+                }
+
                 resolve({
                     documents,
-                    tags,
+                    aggs,
                 });
             });
 

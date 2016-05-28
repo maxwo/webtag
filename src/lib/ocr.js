@@ -11,10 +11,10 @@ export default function ocr(image) {
         log.info(`OCR of file ${image} ready.`);
         tesseract.process(image, options, (err, text) => {
             if (err) {
-                log.info(`OCR of file ${image} failed.`);
+                log.error(`OCR of file ${image} failed.`);
                 reject(err);
             } else {
-                log.error(`OCR of file ${image} done.`);
+                log.info(`OCR of file ${image} done.`);
                 resolve(text);
             }
         });

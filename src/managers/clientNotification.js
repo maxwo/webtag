@@ -46,7 +46,7 @@ function initClient(socket) {
         savedIDs = [];
 
         idToNotify.forEach((id) => {
-            log.info(`Notifying connected user ${user.userName} about ${id}.`)
+            log.info(`Notifying connected user ${user.userName} about ${id}.`);
             inodeIndexer
                 .get(id)
                 .then((inode) => {

@@ -49,6 +49,44 @@ const inodeTemplate = {
 
 export const inodeIndexer = new CachedIndexer('inode', inodeTemplate, 1);
 
+export const inodeAggregations = {
+    group_by_tags: {
+        terms: {
+            field: 'tags',
+        },
+    },
+    group_by_document_year: {
+        terms: {
+            field: 'documentYear',
+        },
+    },
+    group_by_document_month: {
+        terms: {
+            field: 'documentMonth',
+        },
+    },
+    group_by_document_day: {
+        terms: {
+            field: 'documentDay',
+        },
+    },
+    group_by_creation_year: {
+        terms: {
+            field: 'creationYear',
+        },
+    },
+    group_by_creation_month: {
+        terms: {
+            field: 'creationMonth',
+        },
+    },
+    group_by_creation_day: {
+        terms: {
+            field: 'creationDay',
+        },
+    },
+};
+
 export function inodeHandler(request, response, next) {
     inodeIndexer
         .get(request.params.id)
@@ -76,9 +114,9 @@ export function setAggregatedDate(inode, type, date) {
     const fullTime = m.format('HH:mm:ss.SSS');
 
     inode[`${type}Date`] = `${fullDate}T${fullTime}Z`;
-    inode[`${type}Day`] = fullDate;
-    inode[`${type}Month`] = m.format('YYYY-MM');
-    inode[`${type}Year`] = m.format('YYYY');
+    inode[`${type}Day`] = '' + m.format('YYYYMMDD');
+    inode[`${type}Month`] = '' + m.format('YYYYMM');
+    inode[`${type}Year`] = '' + m.format('YYYY');
 
     return inode;
 }
