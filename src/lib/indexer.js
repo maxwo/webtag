@@ -149,7 +149,7 @@ export default class Indexer {
                 }
 
                 if (result.aggregations) {
-                    result.aggregations.forEach((agg) => {
+                    for (const agg in result.aggregations) {
                         const buckets = result.aggregations[agg].buckets;
                         aggs[agg] = [];
                         buckets.forEach((b) => {
@@ -158,7 +158,7 @@ export default class Indexer {
                                 count: b.doc_count,
                             });
                         });
-                    });
+                    }
                 }
 
                 resolve({
