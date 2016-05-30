@@ -5,16 +5,39 @@ import { inodeIndexer, inodeAggregations } from '../../managers/inode';
 
 
 function getAggregates(request, response) {
-    const { words, tags } = extractParameters(request);
-    const query = buildQuery(tags, words);
+    const {
+        words,
+        tags,
+        owners,
+        groups,
+        creationDays,
+        creationMonths,
+        creationYears,
+        documentDays,
+        documentMonths,
+        documentYears,
+    } = extractParameters(request);
+
+    const query = buildQuery(
+        request.user,
+        tags,
+        words,
+        owners,
+        groups,
+        creationDays,
+        creationMonths,
+        creationYears,
+        documentDays,
+        documentMonths,
+        documentYears);
 
     inodeIndexer
-        .search(query, 0, 100, inodeAggregations)
+        .search(query, inodeAggregations)
         .then((results) => {
             response
                 .status(200)
                 .type('json')
-                .end(JSON.stringify(results.aggs, null, 4));
+                .end(JSON.stringify(results.aggregations, null, 4));
         })
         .catch(errorHandler(response));
 }

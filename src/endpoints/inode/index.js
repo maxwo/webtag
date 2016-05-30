@@ -6,16 +6,42 @@ import { inodeIndexer, inodeHandler, inodeAggregations,
          cleanUpInode, checkInodeModification } from '../../managers/inode';
 
 function getInodes(request, response) {
-    const { words, tags } = extractParameters(request);
-    const query = buildQuery(tags, words);
+    const {
+        words,
+        tags,
+        owners,
+        groups,
+        creationDays,
+        creationMonths,
+        creationYears,
+        documentDays,
+        documentMonths,
+        documentYears,
+    } = extractParameters(request);
+
+    const query = buildQuery(
+        request.user,
+        tags,
+        words,
+        owners,
+        groups,
+        creationDays,
+        creationMonths,
+        creationYears,
+        documentDays,
+        documentMonths,
+        documentYears);
 
     inodeIndexer
-        .search(query, 0, 100, inodeAggregations)
+        .search(query, inodeAggregations)
         .then((results) => {
+            results.documents = results.documents.map((d) => d.id);
+            results.aggregations = undefined;
+
             response
                 .status(200)
                 .type('json')
-                .end(JSON.stringify(results.documents, null, 4));
+                .end(JSON.stringify(results, null, 4));
         })
         .catch(errorHandler(response));
 }

@@ -119,7 +119,7 @@ export default class Indexer {
         });
     }
 
-    search(query, from, limit, aggregations) {
+    search(query, aggregations = {}, from = 0, limit = 10) {
         return new Promise((resolve, reject) => {
             log.info('Initializing search of %s.', this.type);
 
@@ -128,6 +128,8 @@ export default class Indexer {
                 size: limit,
                 query,
             };
+
+            console.log(JSON.stringify(sendQuery, null, 4));
 
             if (aggregations) {
                 sendQuery.aggregations = aggregations;
@@ -163,7 +165,10 @@ export default class Indexer {
 
                 resolve({
                     documents,
-                    aggs,
+                    aggregations: aggs,
+                    from,
+                    limit,
+                    total: result.hits.total,
                 });
             });
 

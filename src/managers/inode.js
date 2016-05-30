@@ -53,37 +53,47 @@ const inodeTemplate = {
 export const inodeIndexer = new CachedIndexer('inode', inodeTemplate, 1);
 
 export const inodeAggregations = {
-    group_by_tags: {
+    tags: {
         terms: {
             field: 'tags',
         },
     },
-    group_by_document_year: {
+    owners: {
+        terms: {
+            field: 'owner',
+        },
+    },
+    groups: {
+        terms: {
+            field: 'groups',
+        },
+    },
+    document_years: {
         terms: {
             field: 'documentYear',
         },
     },
-    group_by_document_month: {
+    document_months: {
         terms: {
             field: 'documentMonth',
         },
     },
-    group_by_document_day: {
+    document_days: {
         terms: {
             field: 'documentDay',
         },
     },
-    group_by_creation_year: {
+    creation_years: {
         terms: {
             field: 'creationYear',
         },
     },
-    group_by_creation_month: {
+    creation_months: {
         terms: {
             field: 'creationMonth',
         },
     },
-    group_by_creation_day: {
+    creation_days: {
         terms: {
             field: 'creationDay',
         },

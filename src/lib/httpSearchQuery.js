@@ -1,14 +1,27 @@
+function extractParameter(request, name) {
+    let values;
+    if (typeof request.query[name] === 'string') {
+        request.query[name] = [request.query[name]];
+    }
+
+    if (typeof request.query[name] === 'object') {
+        values = request.query[name];
+    }
+
+    return values;
+}
+
 export default function extractParameters(request) {
     let words;
-    let tags;
-
-    if (typeof request.query.tag === 'string') {
-        request.query.tag = [request.query.tag];
-    }
-
-    if (typeof request.query.tag === 'object') {
-        tags = request.query.tag;
-    }
+    const tags = extractParameter(request, 'tag');
+    const owners = extractParameter(request, 'owner');
+    const groups = extractParameter(request, 'group');
+    const creationDays = extractParameter(request, 'creation_day');
+    const creationMonths = extractParameter(request, 'creation_month');
+    const creationYears = extractParameter(request, 'creation_year');
+    const documentDays = extractParameter(request, 'document_day');
+    const documentMonths = extractParameter(request, 'document_month');
+    const documentYears = extractParameter(request, 'document_year');
 
     if (typeof request.query.text === 'string') {
         words = request.query.text
@@ -19,5 +32,13 @@ export default function extractParameters(request) {
     return {
         words,
         tags,
+        owners,
+        groups,
+        creationDays,
+        creationMonths,
+        creationYears,
+        documentDays,
+        documentMonths,
+        documentYears,
     };
 }
