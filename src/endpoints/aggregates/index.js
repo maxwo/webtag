@@ -34,10 +34,14 @@ function getAggregates(request, response) {
     inodeIndexer
         .search(query, inodeAggregations)
         .then((results) => {
+            results.documents = undefined;
+            results.from = undefined;
+            results.limit = undefined;
+
             response
                 .status(200)
                 .type('json')
-                .end(JSON.stringify(results.aggregations, null, 4));
+                .end(JSON.stringify(results, null, 4));
         })
         .catch(errorHandler(response));
 }
