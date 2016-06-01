@@ -35,7 +35,13 @@ function getInodes(request, response) {
     inodeIndexer
         .search(query, inodeAggregations)
         .then((results) => {
-            results.documents = results.documents.map((d) => d.id);
+            results.documents = results.documents.map((d) => {
+                return {
+                    id: d.id,
+                    width: d.width,
+                    height: d.height,
+                };
+            });
             results.aggregations = undefined;
 
             response

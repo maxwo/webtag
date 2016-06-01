@@ -6,6 +6,7 @@ import { inodeIndexer, setAggregatedDate } from '../managers/inode';
 import { initNotification, getChannel, inodeIndexed } from '../managers/notification';
 import { listenQueue } from '../lib/amqp';
 import { imageContentTypes } from '../lib/imageContentTypes';
+import idendify from '../lib/imageIdentify';
 
 let channel;
 
@@ -30,15 +31,22 @@ function indexInode(message) {
                 const indexPromises = [
                     ocr(fileName),
                     exif(fileName),
+                    idendify(fileName),
                 ];
                 result = Promise
                     .all(indexPromises)
                     .then((results) => {
-                        const [text, exifData] = results;
+                        const [text, exifData, imageData] = results;
 
                         // Indexation of text
                         if (text) {
                             indexedInode.textContent = text;
+                        }
+
+                        // Identification of picture
+                        if (imageData) {
+                            indexedInode.width = imageData.width;
+                            indexedInode.height = imageData.height;
                         }
 
                         // Indexation of EXIF contents
