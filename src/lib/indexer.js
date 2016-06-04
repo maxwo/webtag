@@ -119,7 +119,7 @@ export default class Indexer {
         });
     }
 
-    search(query, aggregations = {}, from = 0, limit = 10) {
+    search(query, aggregations = {}, from = 0, limit = 100) {
         return new Promise((resolve, reject) => {
             log.info('Initializing search of %s.', this.type);
 

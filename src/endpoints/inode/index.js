@@ -61,7 +61,8 @@ function getInode(request, response) {
 function putInode(request, response) {
     if (!checkInodeModification(request.body, request.inode)) {
         response
-            .status(401);
+            .status(401)
+            .end();
     } else {
         const inode = Object.assign({}, request.inode, request.body);
 
