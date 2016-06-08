@@ -142,7 +142,7 @@ export default class Indexer {
                 const documents = [];
                 const aggs = {};
 
-                if (result.hits.total > 0) {
+                if (typeof result.hits !== 'undefined' && result.hits.total > 0) {
                     for (let i = 0; i < result.hits.hits.length; i++) {
                         /* eslint-disable no-underscore-dangle */
                         documents.push(result.hits.hits[i]._source);
@@ -168,7 +168,7 @@ export default class Indexer {
                     aggregations: aggs,
                     from,
                     limit,
-                    total: result.hits.total,
+                    total: (result.hits ? result.hits.total : 0),
                 });
             });
 

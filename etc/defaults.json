@@ -5,7 +5,7 @@
 
     "localStoragePath": "/Users/max/files/",
 
-    "httpsHost": "localhost",
+    "httpsHost": "0.0.0.0",
     "httpsPort": 4433,
     "httpsKey": "dev/certificates/server/server-key.pem",
     "httpsCert": "dev/certificates/server/server-crt.pem",

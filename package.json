@@ -13,8 +13,7 @@
     "build": "babel index.js src -d dist",
     "serve": "node dist/index.js",
     "serveIndexationWorker": "node dist/worker/imageIndexer.js",
-    "install": "brew install elasticsearch redis rabbitmq pkgconfig imagemagick tesseract --with-all-languages",
-    "adduser": "node ./adduser.js"
+    "install": "brew install elasticsearch redis rabbitmq pkgconfig imagemagick tesseract --with-all-languages"
   },
   "main": "index.js",
   "repository": {

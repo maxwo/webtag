@@ -80,7 +80,6 @@ function deleteInode(request, response) {
     inodeIndexer
         .delete(request.inode)
         .then(() => {
-            response.write('');
             response.end();
             storage.delete(request.inode.id);
         })
