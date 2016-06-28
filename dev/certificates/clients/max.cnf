@@ -1,0 +1,30 @@
+[ req ]
+default_bits           = 1024
+days                   = 9999
+distinguished_name     = req_distinguished_name
+attributes             = req_attributes
+prompt                 = no
+x509_extensions        = v3_ca
+
+[ req_distinguished_name ]
+C                      = FR
+ST                     = NPDC
+L                      = Lille
+0.OU                   = dev
+1.OU                   = user
+2.OU                   = photograph
+UID                    = max
+CN                     = Maxime Wojtczak
+emailAddress           = max@example.com
+surname                = Wojtczak
+givenName              = Maxime
+
+[ req_attributes ]
+challengePassword      = password
+
+[ v3_ca ]
+authorityInfoAccess = @issuer_info
+
+[ issuer_info ]
+OCSP;URI.0 = http://ocsp.example.com/
+caIssuers;URI.0 = http://example.com/ca.cert

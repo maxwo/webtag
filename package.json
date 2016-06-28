@@ -2,35 +2,64 @@
   "name": "webtag",
   "version": "0.0.1",
   "author": "Maxime Wojtczak <maximeDOTwojtczak@yahoo.fr>",
-  "description": "A simple file manager based on NodeJS",
+  "description": "A simple document manager based on NodeJS",
   "contributors": [],
   "bin": {
     "http-server": "server.js"
   },
   "scripts": {
-    "adduser": "node ./adduser.js"
+    "start": "nodemon index.js --exec babel-node",
+    "startIndexationWorker": "nodemon src/worker/imageIndexer.js --exec babel-node",
+    "build": "babel index.js src -d dist",
+    "serve": "node dist/index.js",
+    "serveIndexationWorker": "node dist/worker/imageIndexer.js",
+    "install": "brew install elasticsearch redis rabbitmq pkgconfig imagemagick tesseract --with-all-languages"
   },
-  "main": "./server.js --harmony",
+  "main": "index.js",
   "repository": {
     "type": "git",
     "url": "https://github.com/maxwo/webtag.git"
   },
   "keywords": [],
-  "dependencies" : {
-    "express"   :  "3.X",
-    "multiparty" : "3.X",
-    "underscore" : "1.5.X",
-    "elasticsearchclient" : "0.5.X",
-    "winston" : "0.7.X",
-    "nconf" : "0.6.X",
-    "prompt" : "0.2.X",
-    "socket.io" : "0.9.X",
-    "amqp" : "X",
-    "redis" : "0.12.X",
-    "node-uuid" : "1.X"
-  },
   "engines": {
     "node": ">=0.8"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.9.0",
+    "babel-core": "^6.9.0",
+    "babel-preset-es2015": "^6.9.0",
+    "babel-preset-stage-2": "^6.5.0",
+    "babel-watch": "^2.0.2",
+    "eslint": "^2.10.2",
+    "eslint-config-airbnb": "^9.0.1",
+    "eslint-plugin-import": "^1.8.1",
+    "eslint-plugin-jsx-a11y": "^1.2.2",
+    "eslint-plugin-react": "^5.1.1",
+    "gulp": "^3.9.1",
+    "gulp-eslint": "^2.0.0",
+    "nodemon": "^1.9.2"
+  },
+  "dependencies": {
+    "amqp": "^0.2.4",
+    "amqplib": "^0.4.1",
+    "body-parser": "^1.15.1",
+    "deep-equal": "^1.0.1",
+    "elasticsearchclient": "^0.5.3",
+    "exif": "^0.6.0",
+    "express": "^4.13.4",
+    "express-logger": "0.0.3",
+    "imagemagick-native": "^1.9.2",
+    "method-override": "^2.3.6",
+    "mime-types": "^2.1.11",
+    "moment": "^2.13.0",
+    "multiparty": "^4.1.2",
+    "nconf": "^0.8.4",
+    "node-tesseract": "^0.2.7",
+    "node-uuid": "^1.4.7",
+    "prompt": "^1.0.0",
+    "redis": "^2.5.3",
+    "socket.io": "^1.4.6",
+    "underscore": "^1.8.3",
+    "winston": "^2.2.0"
   }
 }
-

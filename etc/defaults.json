@@ -1,0 +1,20 @@
+{
+    "elasticSearchHost": "127.0.0.1",
+    "elasticSearchPort": 9200,
+    "elasticSearchIndex": "webtag",
+
+    "localStoragePath": "/Users/max/files/",
+
+    "httpsHost": "0.0.0.0",
+    "httpsPort": 4433,
+    "httpsKey": "dev/certificates/server/server-key.pem",
+    "httpsCert": "dev/certificates/server/server-crt.pem",
+    "httpsCA": "dev/certificates/ca/ca-crt.pem",
+    "httpsCRL": "dev/certificates/ca/ca-crl.pem",
+
+    "redisHost": "127.0.0.1",
+    "redisPort": 6379,
+    "redisTimeout": 2,
+
+    "amqpHost": "amqp://localhost"
+}
