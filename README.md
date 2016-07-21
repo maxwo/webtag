@@ -12,13 +12,13 @@ This project uses several components to archive image and any file :
 
 Webtag uses several technologies to process and store files :
 
-*   NodeJS (or ioJS) as the web server. Note that to ensure security, HTTPS is
+*   NodeJS (or ioJS) as the web server. To ensure security, HTTPS is
     used, with client side certificate authentication;
 
 *   User and group-based notification based on Socket.IO. Every file
     modification is notified in real-time to the end-users;
 
-*   Fully RESTful, stateless interface, making load balancing between 
+*   Fully RESTful, stateless interface, making load balancing between
     several instances of the webservers easier;
 
 *   RabbitMQ, to ensure communication between the different webserver instances,
@@ -27,3 +27,9 @@ Webtag uses several technologies to process and store files :
 *   Elasticsearch, used as the main database of the project.
 
 *   Redis as cache engine.
+
+TODO
+----
+
+*   Create the storage workers that encrypt files and send them to an Amazon
+    S3 file storage.
