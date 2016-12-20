@@ -1,5 +1,5 @@
 {
-    "elasticSearchHost": "127.0.0.1",
+    "elasticSearchHost": "elasticsearch",
     "elasticSearchPort": 9200,
     "elasticSearchIndex": "webtag",
 
@@ -12,9 +12,9 @@
     "httpsCA": "dev/certificates/ca/ca-crt.pem",
     "httpsCRL": "dev/certificates/ca/ca-crl.pem",
 
-    "redisHost": "127.0.0.1",
+    "redisHost": "redis",
     "redisPort": 6379,
     "redisTimeout": 2,
 
-    "amqpHost": "amqp://localhost"
+    "amqpHost": "amqp://rabbitmq"
 }

@@ -1,6 +1,6 @@
 {
   "name": "webtag",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "author": "Maxime Wojtczak <maximeDOTwojtczak@yahoo.fr>",
   "description": "A simple document manager based on NodeJS",
   "contributors": [],
@@ -11,9 +11,8 @@
     "start": "nodemon index.js --exec babel-node",
     "startIndexationWorker": "nodemon src/worker/imageIndexer.js --exec babel-node",
     "build": "babel index.js src -d dist",
-    "serve": "node dist/index.js",
-    "serveIndexationWorker": "node dist/worker/imageIndexer.js",
-    "install": "brew install elasticsearch redis rabbitmq pkgconfig imagemagick tesseract --with-all-languages"
+    "serve": "node dist/server.js",
+    "serveIndexationWorker": "node dist/worker/imageIndexer.js"
   },
   "main": "index.js",
   "repository": {
@@ -52,6 +51,7 @@
     "method-override": "^2.3.6",
     "mime-types": "^2.1.11",
     "moment": "^2.13.0",
+    "mongoose": "^4.5.5",
     "multiparty": "^4.1.2",
     "nconf": "^0.8.4",
     "node-tesseract": "^0.2.7",
