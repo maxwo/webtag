@@ -5,12 +5,12 @@ services:
     ports:
      - "4433:4433"
     links:
-     - "redis:redis"
-     - "mongo:mongo"
-     - "rabbitmq:rabbitmq"
-     - "elasticsearch:elasticsearch"
+     - "redis"
+     - "mongo"
+     - "rabbitmq"
+     - "elasticsearch"
   redis:
-    image: "redis:alpine"
+    image: "redis"
   mongo:
     image: "mongo"
   rabbitmq:

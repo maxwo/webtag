@@ -17,5 +17,8 @@ RUN npm install
 COPY . /usr/src/app
 RUN npm run build
 
+# Make scripts executable
+RUN chmod +x /usr/src/app/bin/*.sh
+
 EXPOSE 4433
-CMD [ "npm", "run", "serve" ]
+CMD [ "bin/docker-entrypoint.sh" ]
