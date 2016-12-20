@@ -1,0 +1,19 @@
+version: '2'
+services:
+  web:
+    build: .
+    ports:
+     - "4433:4433"
+    links:
+     - "redis:redis"
+     - "mongo:mongo"
+     - "rabbitmq:rabbitmq"
+     - "elasticsearch:elasticsearch"
+  redis:
+    image: "redis:alpine"
+  mongo:
+    image: "mongo"
+  rabbitmq:
+    image: "rabbitmq"
+  elasticsearch:
+    image: "elasticsearch"
