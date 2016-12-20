@@ -12,8 +12,8 @@ const client = redis.createClient(config.get('redisPort'), config.get('redisHost
 
 export default class CachedIndexer extends Indexer {
 
-    constructor(type, template, ttl = 60) {
-        super(type, template);
+    constructor(type, model, ttl = 60) {
+        super(type, model);
         this.ttl = ttl;
     }
 

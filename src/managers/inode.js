@@ -1,6 +1,7 @@
 import CachedIndexer from '../lib/cachedIndexer';
 import equal from 'deep-equal';
 import moment from 'moment';
+import mongoose from 'mongoose';
 import { errorHandler } from '../lib/tools';
 
 const invisibleFields = [
@@ -49,8 +50,51 @@ const inodeTemplate = {
     },
 };
 
+const inodeModel = {
+    id: String,
+    filename: String,
+    contentType: String,
+    tags: [],
+    owner: String,
+    groups: [],
+    uploadDate: {
+        type: Date,
+        default: Date.now,
+    },
+    creationDate: {
+        type: Date,
+        default: Date.now,
+    },
+    indexedDate: Date,
+    archivedDate: Date,
+    deletionDate: Date,
+    documentDate: {
+        type: Date,
+        default: Date.now,
+    },
+    textContent: {
+        type: String,
+        default: '',
+    },
+    received: {
+        type: Boolean,
+        default: true,
+    },
+    indexed: {
+        type: Boolean,
+        default: false,
+    },
+    archived: {
+        type: Boolean,
+        default: false,
+    },
+    deleted: {
+        type: Boolean,
+        default: false,
+    },
+};
 
-export const inodeIndexer = new CachedIndexer('inode', inodeTemplate, 1);
+export const inodeIndexer = new CachedIndexer('inode', inodeModel, 1);
 
 export const inodeAggregations = {
     tags: {

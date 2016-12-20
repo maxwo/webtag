@@ -7,6 +7,15 @@ import uuid from 'node-uuid';
 import { log, DocumentError, Error } from '../lib/tools';
 import { setAggregatedDate } from '../managers/inode';
 import config from '../lib/config';
+import mongoose from 'mongoose';
+
+mongoose.connect('mongodb://mongo/webtag');
+
+const db = mongoose.connection;
+db.on('error', log.error.bind(log, 'connection error:'));
+db.once('open', () => {
+    log.info('Connected to MongoDB.');
+});
 
 const serverOptions = {
     host: config.get('elasticSearchHost'),
@@ -18,9 +27,10 @@ const index = config.get('elasticSearchIndex');
 
 export default class Indexer {
 
-    constructor(type, template) {
+    constructor(type, schema) {
         this.type = type;
-        this.template = template;
+        this.schema = schema;
+        this.model = mongoose.model(type, schema);
     }
 
     index(document) {
