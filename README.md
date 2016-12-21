@@ -1,16 +1,9 @@
 webtag
 ======
 
-A simple, distributed, tag-based, image & file archiver.
+A simple, distributed, tag-based, image archiver.
 
-Technical presentation
-----------------------
-
-This project uses several components to archive image and any file :
-
-![Technical schema](http://maxwo.github.io/images/webtag.png "Technical schema")
-
-Webtag uses several technologies to process and store files :
+This project uses several components to archive images and any file:
 
 *   NodeJS (or ioJS) as the web server. To ensure security, HTTPS is
     used, with client side certificate authentication;
@@ -18,13 +11,12 @@ Webtag uses several technologies to process and store files :
 *   User and group-based notification based on Socket.IO. Every file
     modification is notified in real-time to the end-users;
 
-*   Fully RESTful, stateless interface, making load balancing between
-    several instances of the webservers easier;
+*   RESTful, making load balancing between several instances of the
+    webservers easier;
 
-*   RabbitMQ, to ensure communication between the different webserver instances,
-    allowing maximum scalability, as well as between webservers and OCR workers.
+*   RabbitMQ, to ensure communication between the different webserver instances;
 
-*   Elasticsearch, used as the main database of the project.
+*   Elasticsearch. You know, for search;
 
 *   Redis as cache engine.
 
@@ -32,4 +24,4 @@ TODO
 ----
 
 *   Create the storage workers that encrypt files and send them to an Amazon
-    S3 file storage.
+    S3 or Glacier file storage.
